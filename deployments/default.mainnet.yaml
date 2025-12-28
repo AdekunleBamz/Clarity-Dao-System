@@ -1,0 +1,39 @@
+---
+id: 0
+name: Mainnet deployment
+network: mainnet
+stacks-node: "https://api.mainnet.hiro.so"
+bitcoin-node: "https://bitcoin-mainnet.stacks.co"
+
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - contract-publish:
+            contract-name: sip-010-trait
+            expected-sender: $DEPLOYER_ADDRESS
+            cost: 500000
+            path: contracts/sip-010-trait.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: dao-token
+            expected-sender: $DEPLOYER_ADDRESS
+            cost: 500000
+            path: contracts/dao-token.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: governance
+            expected-sender: $DEPLOYER_ADDRESS
+            cost: 500000
+            path: contracts/governance.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: treasury
+            expected-sender: $DEPLOYER_ADDRESS
+            cost: 500000
+            path: contracts/treasury.clar
+            anchor-block-only: true
+            clarity-version: 3
