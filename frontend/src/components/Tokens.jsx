@@ -1,7 +1,7 @@
 import { useWallet } from '../context/WalletContext'
 
 export default function Tokens() {
-  const { isConnected, address, deployer } = useWallet()
+  const { isConnected, address } = useWallet()
 
   const tokenInfo = {
     name: 'DAO Token',
@@ -88,20 +88,18 @@ export default function Tokens() {
         </div>
       </div>
 
-      <div className="card">
+      <div className="card bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-200 dark:border-amber-800">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Token Contract
+          About DAO Tokens
         </h2>
-        <div className="space-y-2">
-          <div className="flex justify-between py-2 border-b border-gray-100 dark:border-gray-700">
-            <span className="text-gray-500">Contract</span>
-            <code className="text-sm font-mono text-gray-900 dark:text-white">
-              {deployer}.dao-token
-            </code>
-          </div>
-          <div className="flex justify-between py-2">
-            <span className="text-gray-500">Standard</span>
-            <span className="text-gray-900 dark:text-white">SIP-010 Fungible Token</span>
+        <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+          <p>
+            DAO Tokens are SIP-010 compliant fungible tokens that represent your stake in the organization.
+          </p>
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-1 bg-amber-500/20 rounded text-amber-700 dark:text-amber-400 text-xs">Governance Rights</span>
+            <span className="px-2 py-1 bg-orange-500/20 rounded text-orange-700 dark:text-orange-400 text-xs">Voting Power</span>
+            <span className="px-2 py-1 bg-yellow-500/20 rounded text-yellow-700 dark:text-yellow-400 text-xs">Transferable</span>
           </div>
         </div>
       </div>

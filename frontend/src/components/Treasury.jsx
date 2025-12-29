@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useWallet } from '../context/WalletContext'
 
 export default function Treasury() {
-  const { isConnected, deployer } = useWallet()
+  const { isConnected } = useWallet()
   const [showDepositModal, setShowDepositModal] = useState(false)
 
   const treasuryData = {
@@ -102,13 +102,15 @@ export default function Treasury() {
         </div>
       </div>
 
-      <div className="card">
+      <div className="card bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-200 dark:border-green-800">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Treasury Contract
+          About the Treasury
         </h2>
-        <code className="text-sm text-gray-600 dark:text-gray-300 font-mono">
-          {deployer}.treasury
-        </code>
+        <p className="text-sm text-gray-600 dark:text-gray-300">
+          The DAO Treasury is a community-managed fund secured by Stacks smart contracts. 
+          All deposits and withdrawals are governed by token holder votes, ensuring 
+          transparent and decentralized financial management.
+        </p>
       </div>
 
       {showDepositModal && (

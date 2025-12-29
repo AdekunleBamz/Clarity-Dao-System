@@ -2,7 +2,7 @@ import { useWallet } from '../context/WalletContext'
 import { Link } from 'react-router-dom'
 
 export default function Dashboard() {
-  const { isConnected, address, deployer } = useWallet()
+  const { isConnected, address } = useWallet()
 
   const stats = [
     { label: 'Total Supply', value: '1,000,000,000', unit: 'DAO' },
@@ -96,34 +96,37 @@ export default function Dashboard() {
         </Link>
       </div>
 
-      <div className="card">
+      <div className="card bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border-indigo-200 dark:border-indigo-800">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Contract Information
+          Why Clarity DAO?
         </h3>
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between py-2 border-b border-gray-100 dark:border-gray-700">
-            <span className="text-gray-500">Deployer</span>
-            <code className="text-gray-900 dark:text-white font-mono text-xs">
-              {deployer}
-            </code>
+        <div className="space-y-4 text-sm">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 bg-indigo-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span className="text-indigo-600 dark:text-indigo-400">🔐</span>
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-white">Secure & Transparent</h4>
+              <p className="text-gray-500 dark:text-gray-400">Built on Stacks, secured by Bitcoin's proof-of-work</p>
+            </div>
           </div>
-          <div className="flex justify-between py-2 border-b border-gray-100 dark:border-gray-700">
-            <span className="text-gray-500">DAO Token</span>
-            <code className="text-gray-900 dark:text-white font-mono text-xs">
-              {deployer}.dao-token
-            </code>
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span className="text-purple-600 dark:text-purple-400">⚡</span>
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-white">Community Driven</h4>
+              <p className="text-gray-500 dark:text-gray-400">Every token holder has a voice in governance decisions</p>
+            </div>
           </div>
-          <div className="flex justify-between py-2 border-b border-gray-100 dark:border-gray-700">
-            <span className="text-gray-500">Governance</span>
-            <code className="text-gray-900 dark:text-white font-mono text-xs">
-              {deployer}.governance
-            </code>
-          </div>
-          <div className="flex justify-between py-2">
-            <span className="text-gray-500">Treasury</span>
-            <code className="text-gray-900 dark:text-white font-mono text-xs">
-              {deployer}.treasury
-            </code>
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span className="text-green-600 dark:text-green-400">💎</span>
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-white">Decentralized Treasury</h4>
+              <p className="text-gray-500 dark:text-gray-400">Funds are managed collectively through smart contracts</p>
+            </div>
           </div>
         </div>
       </div>
