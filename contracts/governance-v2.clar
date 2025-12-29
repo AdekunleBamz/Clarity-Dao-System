@@ -298,3 +298,53 @@
     (asserts! (> voter-power u0) ERR-INSUFFICIENT-TOKENS)
     
     ;; Record vote
+    (map-set votes 
+      { proposal-id: proposal-id, voter: voter }
+      { amount: voter-power, vote-for: vote-for }
+    )
+    
+    ;; Snapshot voting power
+    (map-set voting-power-snapshot
+      { proposal-id: proposal-id, voter: voter }
+      voter-power
+    )
+    
+    ;; Update vote counts
+    (if vote-for
+      (map-set proposals proposal-id (merge proposal { votes-for: (+ (get votes-for proposal) voter-power) }))
+      (map-set proposals proposal-id (merge proposal { votes-against: (+ (get votes-against proposal) voter-power) }))
+    )
+    
+    (print { 
+      event: "vote-cast", 
+      proposal-id: proposal-id, 
+      voter: voter, 
+      vote-for: vote-for, 
+      amount: voter-power 
+    })
+    (ok true)
+  )
+)
+
+;; Change vote on a proposal (before voting ends)
+(define-public (change-vote (proposal-id uint) (new-vote-for bool))
+  (let (
+    (voter tx-sender)
+    (proposal (unwrap! (map-get? proposals proposal-id) ERR-PROPOSAL-NOT-FOUND))
+    (existing-vote (unwrap! (map-get? votes { proposal-id: proposal-id, voter: voter }) ERR-NO-VOTE-TO-CHANGE))
+    (vote-amount (get amount existing-vote))
+    (old-vote-for (get vote-for existing-vote))
+  )
+    ;; Check proposal is active
+    (asserts! (is-eq (get status proposal) STATUS-ACTIVE) ERR-PROPOSAL-NOT-ACTIVE)
+    ;; Check voting period
+    (asserts! (<= stacks-block-height (get end-block proposal)) ERR-PROPOSAL-EXPIRED)
+    
+    ;; Only process if vote is actually changing
+    (if (is-eq old-vote-for new-vote-for)
+      (ok true)  ;; No change needed
+      (begin
+        ;; Update vote record
+        (map-set votes 
+          { proposal-id: proposal-id, voter: voter }
+          { amount: vote-amount, vote-for: new-vote-for }
