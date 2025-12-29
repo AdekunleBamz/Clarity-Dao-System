@@ -198,3 +198,53 @@
     (let ((current-delegated (default-to u0 (map-get? delegated-power-received delegate-to))))
       (map-set delegated-power-received delegate-to
         (if (>= current-delegated delegator-balance)
+          (- current-delegated delegator-balance)
+          u0
+        ))
+    )
+    
+    (print { event: "delegation-revoked", delegator: delegator, delegate: delegate-to })
+    (ok true)
+  )
+)
+
+;; =====================
+;; PROPOSAL FUNCTIONS
+;; =====================
+
+;; Create a new proposal
+(define-public (create-proposal 
+  (title (string-ascii 100)) 
+  (description (string-utf8 500))
+  (proposal-type uint)
+  (execution-data (optional (buff 256))))
+  (let (
+    (proposer tx-sender)
+    (proposal-id (+ (var-get proposal-count) u1))
+    (current-block stacks-block-height)
+    (proposer-power (calculate-voting-power proposer))
+    (total-supply (get-total-token-supply))
+  )
+    ;; Check minimum token requirement
+    (asserts! (>= proposer-power MIN-PROPOSAL-TOKENS) ERR-INSUFFICIENT-TOKENS)
+    ;; Validate proposal type
+    (asserts! (and (>= proposal-type TYPE-GENERAL) (<= proposal-type TYPE-EMERGENCY)) ERR-INVALID-PROPOSAL)
+    
+    ;; Create proposal with total supply snapshot for quorum calculation
+    (map-set proposals proposal-id {
+      proposer: proposer,
+      title: title,
+      description: description,
+      proposal-type: proposal-type,
+      start-block: current-block,
+      end-block: (+ current-block VOTING-PERIOD),
+      execution-block: (+ current-block VOTING-PERIOD TIMELOCK-PERIOD),
+      votes-for: u0,
+      votes-against: u0,
+      status: STATUS-ACTIVE,
+      execution-data: execution-data,
+      total-supply-snapshot: total-supply
+    })
+    
+    ;; Update proposal count
+    (var-set proposal-count proposal-id)
