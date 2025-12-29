@@ -48,3 +48,53 @@
 (define-constant STATUS-EXPIRED u5)
 (define-constant STATUS-CANCELLED u6)
 
+;; Proposal types
+(define-constant TYPE-GENERAL u1)
+(define-constant TYPE-FUNDING u2)
+(define-constant TYPE-PARAMETER u3)
+(define-constant TYPE-EMERGENCY u4)
+
+;; =====================
+;; DATA VARIABLES
+;; =====================
+
+(define-data-var proposal-count uint u0)
+(define-data-var token-contract principal .dao-token)
+
+;; =====================
+;; DATA MAPS
+;; =====================
+
+;; Proposal storage (enhanced)
+(define-map proposals
+  uint
+  {
+    proposer: principal,
+    title: (string-ascii 100),
+    description: (string-utf8 500),
+    proposal-type: uint,
+    start-block: uint,
+    end-block: uint,
+    execution-block: uint,
+    votes-for: uint,
+    votes-against: uint,
+    status: uint,
+    execution-data: (optional (buff 256)),
+    total-supply-snapshot: uint
+  }
+)
+
+;; Track who has voted on which proposal
+(define-map votes
+  { proposal-id: uint, voter: principal }
+  { amount: uint, vote-for: bool }
+)
+
+;; Voting power snapshot at proposal creation
+(define-map voting-power-snapshot
+  { proposal-id: uint, voter: principal }
+  uint
+)
+
+;; Delegation system
+(define-map delegations
