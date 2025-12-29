@@ -448,3 +448,53 @@
       event: "proposal-executed", 
       proposal-id: proposal-id,
       execution-data: (get execution-data proposal),
+      executed-at-block: stacks-block-height
+    })
+    (ok true)
+  )
+)
+
+;; =====================
+;; READ-ONLY FUNCTIONS
+;; =====================
+
+;; Get proposal details
+(define-read-only (get-proposal (proposal-id uint))
+  (map-get? proposals proposal-id)
+)
+
+;; Get vote details
+(define-read-only (get-vote (proposal-id uint) (voter principal))
+  (map-get? votes { proposal-id: proposal-id, voter: voter })
+)
+
+;; Get total proposal count
+(define-read-only (get-proposal-count)
+  (var-get proposal-count)
+)
+
+;; Check if proposal is active
+(define-read-only (is-proposal-active (proposal-id uint))
+  (match (map-get? proposals proposal-id)
+    proposal (and 
+      (is-eq (get status proposal) STATUS-ACTIVE)
+      (<= stacks-block-height (get end-block proposal))
+    )
+    false
+  )
+)
+
+;; Check if proposal is in timelock
+(define-read-only (is-in-timelock (proposal-id uint))
+  (match (map-get? proposals proposal-id)
+    proposal (and 
+      (is-eq (get status proposal) STATUS-PASSED)
+      (< stacks-block-height (get execution-block proposal))
+    )
+    false
+  )
+)
+
+;; Get blocks remaining in timelock
+(define-read-only (get-timelock-remaining (proposal-id uint))
+  (match (map-get? proposals proposal-id)
