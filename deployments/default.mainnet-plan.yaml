@@ -11,28 +11,35 @@ plan:
         - contract-publish:
             contract-name: sip-010-trait
             expected-sender: SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N
-            cost: 734833
+            cost: 7480
             path: contracts/sip-010-trait.clar
             anchor-block-only: true
             clarity-version: 3
         - contract-publish:
             contract-name: dao-token
             expected-sender: SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N
-            cost: 735590
+            cost: 59550
             path: contracts/dao-token.clar
             anchor-block-only: true
             clarity-version: 3
         - contract-publish:
             contract-name: governance
             expected-sender: SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N
-            cost: 735984
+            cost: 85890
             path: contracts/governance.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: governance-v2
+            expected-sender: SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N
+            cost: 197680
+            path: contracts/governance-v2.clar
             anchor-block-only: true
             clarity-version: 3
         - contract-publish:
             contract-name: treasury
             expected-sender: SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N
-            cost: 735923
+            cost: 83090
             path: contracts/treasury.clar
             anchor-block-only: true
             clarity-version: 3
