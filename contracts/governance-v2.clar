@@ -148,3 +148,53 @@
 ;; =====================
 ;; DELEGATION FUNCTIONS
 ;; =====================
+
+;; Delegate voting power to another address
+(define-public (delegate (delegate-to principal))
+  (let (
+    (delegator tx-sender)
+    (delegator-balance (get-token-balance delegator))
+  )
+    ;; Cannot delegate to self
+    (asserts! (not (is-eq delegator delegate-to)) ERR-CANNOT-DELEGATE-TO-SELF)
+    ;; Must have tokens to delegate
+    (asserts! (> delegator-balance u0) ERR-INSUFFICIENT-TOKENS)
+    ;; Check for circular delegation (delegate-to shouldn't have delegated to delegator)
+    (asserts! (not (is-eq (default-to delegate-to (map-get? delegations delegate-to)) delegator)) 
+              ERR-CIRCULAR-DELEGATION)
+    ;; Cannot delegate if already delegated (must revoke first)
+    (asserts! (not (default-to false (map-get? has-delegated delegator))) ERR-DELEGATION-EXISTS)
+    
+    ;; Set delegation
+    (map-set delegations delegator delegate-to)
+    (map-set has-delegated delegator true)
+    
+    ;; Update delegated power received by delegate
+    (map-set delegated-power-received delegate-to
+      (+ (default-to u0 (map-get? delegated-power-received delegate-to)) delegator-balance))
+    
+    (print { 
+      event: "delegation-created", 
+      delegator: delegator, 
+      delegate: delegate-to, 
+      amount: delegator-balance 
+    })
+    (ok true)
+  )
+)
+
+;; Revoke delegation
+(define-public (revoke-delegation)
+  (let (
+    (delegator tx-sender)
+    (delegate-to (unwrap! (map-get? delegations delegator) ERR-NOT-AUTHORIZED))
+    (delegator-balance (get-token-balance delegator))
+  )
+    ;; Remove delegation
+    (map-delete delegations delegator)
+    (map-set has-delegated delegator false)
+    
+    ;; Update delegated power (subtract)
+    (let ((current-delegated (default-to u0 (map-get? delegated-power-received delegate-to))))
+      (map-set delegated-power-received delegate-to
+        (if (>= current-delegated delegator-balance)
