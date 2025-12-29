@@ -548,3 +548,53 @@
 (define-read-only (get-quorum-requirement (proposal-id uint))
   (match (map-get? proposals proposal-id)
     proposal (calculate-quorum (get total-supply-snapshot proposal))
+    u0
+  )
+)
+
+;; Get voting participation for a proposal
+(define-read-only (get-participation (proposal-id uint))
+  (match (map-get? proposals proposal-id)
+    proposal 
+      (let (
+        (total-votes (+ (get votes-for proposal) (get votes-against proposal)))
+        (total-supply (get total-supply-snapshot proposal))
+      )
+        {
+          total-votes: total-votes,
+          total-supply: total-supply,
+          participation-percentage: (if (> total-supply u0)
+            (/ (* total-votes u100) total-supply)
+            u0
+          ),
+          quorum-met: (>= total-votes (calculate-quorum total-supply))
+        }
+      )
+    { total-votes: u0, total-supply: u0, participation-percentage: u0, quorum-met: false }
+  )
+)
+
+;; Get proposal status name
+(define-read-only (get-status-name (status uint))
+  (if (is-eq status STATUS-ACTIVE) "active"
+    (if (is-eq status STATUS-PASSED) "passed"
+      (if (is-eq status STATUS-REJECTED) "rejected"
+        (if (is-eq status STATUS-EXECUTED) "executed"
+          (if (is-eq status STATUS-EXPIRED) "expired"
+            (if (is-eq status STATUS-CANCELLED) "cancelled"
+              "unknown"
+            )
+          )
+        )
+      )
+    )
+  )
+)
+
+;; Get proposal type name
+(define-read-only (get-type-name (proposal-type uint))
+  (if (is-eq proposal-type TYPE-GENERAL) "general"
+    (if (is-eq proposal-type TYPE-FUNDING) "funding"
+      (if (is-eq proposal-type TYPE-PARAMETER) "parameter"
+        (if (is-eq proposal-type TYPE-EMERGENCY) "emergency"
+          "unknown"
