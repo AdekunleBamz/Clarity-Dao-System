@@ -598,3 +598,22 @@
       (if (is-eq proposal-type TYPE-PARAMETER) "parameter"
         (if (is-eq proposal-type TYPE-EMERGENCY) "emergency"
           "unknown"
+        )
+      )
+    )
+  )
+)
+
+;; =====================
+;; GOVERNANCE PARAMETERS (read-only)
+;; =====================
+
+(define-read-only (get-governance-parameters)
+  {
+    voting-period: VOTING-PERIOD,
+    timelock-period: TIMELOCK-PERIOD,
+    min-proposal-tokens: MIN-PROPOSAL-TOKENS,
+    quorum-percentage: QUORUM-PERCENTAGE,
+    approval-threshold: APPROVAL-THRESHOLD
+  }
+)
