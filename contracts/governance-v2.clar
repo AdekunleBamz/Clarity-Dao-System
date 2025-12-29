@@ -248,3 +248,53 @@
     
     ;; Update proposal count
     (var-set proposal-count proposal-id)
+    
+    (print { 
+      event: "proposal-created", 
+      proposal-id: proposal-id, 
+      proposer: proposer, 
+      title: title,
+      proposal-type: proposal-type,
+      end-block: (+ current-block VOTING-PERIOD),
+      execution-block: (+ current-block VOTING-PERIOD TIMELOCK-PERIOD),
+      total-supply-snapshot: total-supply
+    })
+    (ok proposal-id)
+  )
+)
+
+;; Cancel a proposal (only by proposer, only if still active)
+(define-public (cancel-proposal (proposal-id uint))
+  (let (
+    (proposal (unwrap! (map-get? proposals proposal-id) ERR-PROPOSAL-NOT-FOUND))
+  )
+    ;; Only proposer can cancel
+    (asserts! (is-eq tx-sender (get proposer proposal)) ERR-NOT-AUTHORIZED)
+    ;; Can only cancel active proposals
+    (asserts! (is-eq (get status proposal) STATUS-ACTIVE) ERR-PROPOSAL-NOT-ACTIVE)
+    
+    ;; Mark as cancelled
+    (map-set proposals proposal-id (merge proposal { status: STATUS-CANCELLED }))
+    
+    (print { event: "proposal-cancelled", proposal-id: proposal-id, proposer: tx-sender })
+    (ok true)
+  )
+)
+
+;; Cast a vote on a proposal
+(define-public (vote (proposal-id uint) (vote-for bool))
+  (let (
+    (voter tx-sender)
+    (proposal (unwrap! (map-get? proposals proposal-id) ERR-PROPOSAL-NOT-FOUND))
+    (voter-power (calculate-voting-power voter))
+  )
+    ;; Check proposal is active
+    (asserts! (is-eq (get status proposal) STATUS-ACTIVE) ERR-PROPOSAL-NOT-ACTIVE)
+    ;; Check voting period
+    (asserts! (<= stacks-block-height (get end-block proposal)) ERR-PROPOSAL-EXPIRED)
+    ;; Check hasn't voted already
+    (asserts! (is-none (map-get? votes { proposal-id: proposal-id, voter: voter })) ERR-ALREADY-VOTED)
+    ;; Check has voting power
+    (asserts! (> voter-power u0) ERR-INSUFFICIENT-TOKENS)
+    
+    ;; Record vote
