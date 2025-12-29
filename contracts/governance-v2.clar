@@ -98,3 +98,53 @@
 
 ;; Delegation system
 (define-map delegations
+  principal  ;; delegator
+  principal  ;; delegate (who receives the voting power)
+)
+
+;; Track delegated power received
+(define-map delegated-power-received
+  principal
+  uint
+)
+
+;; Track if user has active delegation
+(define-map has-delegated principal bool)
+
+;; =====================
+;; PRIVATE FUNCTIONS
+;; =====================
+
+;; Get token balance from dao-token contract
+(define-private (get-token-balance (account principal))
+  (unwrap-panic (contract-call? .dao-token get-balance account))
+)
+
+;; Get total token supply from dao-token contract
+(define-private (get-total-token-supply)
+  (unwrap-panic (contract-call? .dao-token get-total-supply))
+)
+
+;; Calculate effective voting power (own tokens + delegated power)
+(define-private (calculate-voting-power (voter principal))
+  (let (
+    (own-balance (get-token-balance voter))
+    (delegated-to-voter (default-to u0 (map-get? delegated-power-received voter)))
+    (has-delegated-away (default-to false (map-get? has-delegated voter)))
+  )
+    ;; If user has delegated their power away, they can't vote with own tokens
+    (if has-delegated-away
+      delegated-to-voter  ;; Only use power delegated TO them
+      (+ own-balance delegated-to-voter)  ;; Own tokens + delegated power
+    )
+  )
+)
+
+;; Calculate dynamic quorum based on total supply
+(define-private (calculate-quorum (total-supply uint))
+  (/ (* total-supply QUORUM-PERCENTAGE) u100)
+)
+
+;; =====================
+;; DELEGATION FUNCTIONS
+;; =====================
