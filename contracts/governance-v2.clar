@@ -498,3 +498,53 @@
 ;; Get blocks remaining in timelock
 (define-read-only (get-timelock-remaining (proposal-id uint))
   (match (map-get? proposals proposal-id)
+    proposal 
+      (if (>= stacks-block-height (get execution-block proposal))
+        u0
+        (- (get execution-block proposal) stacks-block-height)
+      )
+    u0
+  )
+)
+
+;; Get voting power for a member (real-time from token contract)
+(define-read-only (get-voting-power (member principal))
+  (calculate-voting-power member)
+)
+
+;; Get delegation info
+(define-read-only (get-delegation (delegator principal))
+  (map-get? delegations delegator)
+)
+
+;; Get delegated power received by address
+(define-read-only (get-delegated-power (delegate-address principal))
+  (default-to u0 (map-get? delegated-power-received delegate-address))
+)
+
+;; Check if address has delegated their power
+(define-read-only (has-delegated-power (delegator principal))
+  (default-to false (map-get? has-delegated delegator))
+)
+
+;; Calculate if proposal would pass with current votes
+(define-read-only (would-proposal-pass (proposal-id uint))
+  (match (map-get? proposals proposal-id)
+    proposal 
+      (let (
+        (total-votes (+ (get votes-for proposal) (get votes-against proposal)))
+        (quorum (calculate-quorum (get total-supply-snapshot proposal)))
+      )
+        (and 
+          (>= total-votes quorum)
+          (> (* (get votes-for proposal) u100) (* total-votes APPROVAL-THRESHOLD))
+        )
+      )
+    false
+  )
+)
+
+;; Get current quorum requirement for a proposal
+(define-read-only (get-quorum-requirement (proposal-id uint))
+  (match (map-get? proposals proposal-id)
+    proposal (calculate-quorum (get total-supply-snapshot proposal))
