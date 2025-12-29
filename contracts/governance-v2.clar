@@ -348,3 +348,53 @@
         (map-set votes 
           { proposal-id: proposal-id, voter: voter }
           { amount: vote-amount, vote-for: new-vote-for }
+        )
+        
+        ;; Update vote counts (remove from old, add to new)
+        (if old-vote-for
+          ;; Was FOR, now AGAINST
+          (map-set proposals proposal-id (merge proposal { 
+            votes-for: (- (get votes-for proposal) vote-amount),
+            votes-against: (+ (get votes-against proposal) vote-amount)
+          }))
+          ;; Was AGAINST, now FOR
+          (map-set proposals proposal-id (merge proposal { 
+            votes-for: (+ (get votes-for proposal) vote-amount),
+            votes-against: (- (get votes-against proposal) vote-amount)
+          }))
+        )
+        
+        (print { 
+          event: "vote-changed", 
+          proposal-id: proposal-id, 
+          voter: voter, 
+          new-vote-for: new-vote-for,
+          amount: vote-amount 
+        })
+        (ok true)
+      )
+    )
+  )
+)
+
+;; Finalize a proposal after voting ends
+(define-public (finalize-proposal (proposal-id uint))
+  (let (
+    (proposal (unwrap! (map-get? proposals proposal-id) ERR-PROPOSAL-NOT-FOUND))
+    (total-votes (+ (get votes-for proposal) (get votes-against proposal)))
+    (quorum-threshold (calculate-quorum (get total-supply-snapshot proposal)))
+  )
+    ;; Check proposal is still active
+    (asserts! (is-eq (get status proposal) STATUS-ACTIVE) ERR-PROPOSAL-NOT-ACTIVE)
+    ;; Check voting period has ended
+    (asserts! (> stacks-block-height (get end-block proposal)) ERR-VOTING-NOT-ENDED)
+    
+    ;; Determine outcome based on dynamic quorum
+    (if (< total-votes quorum-threshold)
+      ;; Quorum not met - expired
+      (begin
+        (map-set proposals proposal-id (merge proposal { status: STATUS-EXPIRED }))
+        (print { 
+          event: "proposal-expired", 
+          proposal-id: proposal-id, 
+          reason: "quorum-not-met",
