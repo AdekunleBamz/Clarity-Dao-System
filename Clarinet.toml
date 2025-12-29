@@ -22,6 +22,12 @@ path = "contracts/governance.clar"
 clarity_version = 3
 epoch = 3.3
 
+[contracts.governance-v2]
+path = "contracts/governance-v2.clar"
+clarity_version = 3
+epoch = 3.3
+depends_on = ["dao-token"]
+
 [contracts.treasury]
 path = "contracts/treasury.clar"
 clarity_version = 3
@@ -30,3 +36,6 @@ epoch = 3.3
 [repl.analysis]
 passes = ["check_checker"]
 check_checker = { trusted_sender = false, trusted_caller = false, callee_filter = false }
+
+[contracts.governance-v3]
+path = "contracts/governance-v3.clar"
