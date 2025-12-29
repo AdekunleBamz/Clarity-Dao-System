@@ -398,3 +398,53 @@
           event: "proposal-expired", 
           proposal-id: proposal-id, 
           reason: "quorum-not-met",
+          total-votes: total-votes,
+          quorum-required: quorum-threshold
+        })
+        (ok STATUS-EXPIRED)
+      )
+      ;; Check if passed (51% threshold)
+      (if (> (* (get votes-for proposal) u100) (* total-votes APPROVAL-THRESHOLD))
+        (begin
+          (map-set proposals proposal-id (merge proposal { status: STATUS-PASSED }))
+          (print { 
+            event: "proposal-passed", 
+            proposal-id: proposal-id,
+            votes-for: (get votes-for proposal),
+            votes-against: (get votes-against proposal),
+            execution-block: (get execution-block proposal)
+          })
+          (ok STATUS-PASSED)
+        )
+        (begin
+          (map-set proposals proposal-id (merge proposal { status: STATUS-REJECTED }))
+          (print { 
+            event: "proposal-rejected", 
+            proposal-id: proposal-id,
+            votes-for: (get votes-for proposal),
+            votes-against: (get votes-against proposal)
+          })
+          (ok STATUS-REJECTED)
+        )
+      )
+    )
+  )
+)
+
+;; Execute a passed proposal (after timelock)
+(define-public (execute-proposal (proposal-id uint))
+  (let (
+    (proposal (unwrap! (map-get? proposals proposal-id) ERR-PROPOSAL-NOT-FOUND))
+  )
+    ;; Check proposal passed
+    (asserts! (is-eq (get status proposal) STATUS-PASSED) ERR-PROPOSAL-NOT-PASSED)
+    ;; Check timelock has expired
+    (asserts! (>= stacks-block-height (get execution-block proposal)) ERR-TIMELOCK-NOT-EXPIRED)
+    
+    ;; Mark as executed
+    (map-set proposals proposal-id (merge proposal { status: STATUS-EXECUTED }))
+    
+    (print { 
+      event: "proposal-executed", 
+      proposal-id: proposal-id,
+      execution-data: (get execution-data proposal),
