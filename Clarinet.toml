@@ -39,3 +39,27 @@ check_checker = { trusted_sender = false, trusted_caller = false, callee_filter 
 
 [contracts.governance-v3]
 path = "contracts/governance-v3.clar"
+clarity_version = 3
+epoch = 3.3
+depends_on = ["dao-token"]
+
+[contracts.governance-v4]
+path = "contracts/governance-v4.clar"
+clarity_version = 3
+epoch = 3.3
+depends_on = ["dao-token"]
+
+[contracts.treasury-v2]
+path = "contracts/treasury-v2.clar"
+clarity_version = 3
+epoch = 3.3
+
+[contracts.treasury-upgrade]
+path = "contracts/treasury-upgrade.clar"
+clarity_version = 3
+epoch = 3.3
+
+[contracts.treasury-v2-simple]
+path = "contracts/treasury-v2-simple.clar"
+clarity_version = 3
+epoch = 3.3

@@ -32,3 +32,6 @@ npm-debug.log*
 # Cache
 .cache/
 .parcel-cache/
+
+scripts
+

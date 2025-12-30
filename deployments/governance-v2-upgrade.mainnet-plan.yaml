@@ -1,0 +1,18 @@
+---
+id: 0
+name: Governance V2 Upgrade Deployment
+network: mainnet
+stacks-node: "https://api.hiro.so"
+bitcoin-node: "http://blockstack:blockstacksystem@bitcoin.blockstack.com:8332"
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - contract-publish:
+            contract-name: governance-v2
+            expected-sender: SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N
+            cost: 197680
+            path: contracts/governance-v2.clar
+            anchor-block-only: true
+            clarity-version: 3
+      epoch: "3.3"

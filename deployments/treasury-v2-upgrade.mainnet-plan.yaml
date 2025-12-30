@@ -1,0 +1,94 @@
+---
+id: 3
+name: Deploy Treasury V2 Contract
+network: mainnet
+stacks-node: "https://api.mainnet.hiro.so"
+bitcoin-node: "https://bitcoin-mainnet.gateway.pokt.network"
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - contract-publish:
+            contract-name: treasury-v2
+            expected-sender: SP3P9R2T7SN8Q9S9K2AACV2D3ZR8CMXPYQV0NN5CQ
+            cost: 500000
+            path: contracts/treasury-v2.clar
+            anchor-block-only: true
+            clarity-version: 3
+
+    - id: 1
+      transactions:
+        # Set governance contract on treasury-v2
+        - contract-call:
+            contract-id: SP3P9R2T7SN8Q9S9K2AACV2D3ZR8CMXPYQV0NN5CQ.treasury-v2
+            expected-sender: SP3P9R2T7SN8Q9S9K2AACV2D3ZR8CMXPYQV0NN5CQ
+            method: set-governance-contract
+            parameters:
+              - "'SP3P9R2T7SN8Q9S9K2AACV2D3ZR8CMXPYQV0NN5CQ.governance-v4"
+            cost: 50000
+
+    - id: 2
+      transactions:
+        # Add additional multi-sig signers
+        - contract-call:
+            contract-id: SP3P9R2T7SN8Q9S9K2AACV2D3ZR8CMXPYQV0NN5CQ.treasury-v2
+            expected-sender: SP3P9R2T7SN8Q9S9K2AACV2D3ZR8CMXPYQV0NN5CQ
+            method: add-signer
+            parameters:
+              - "'SP2K0D7H1R5N7XQMH07K8R0V1X8M6Z8EG35RJ4Q4A"  # Second signer address
+            cost: 30000
+
+        - contract-call:
+            contract-id: SP3P9R2T7SN8Q9S9K2AACV2D3ZR8CMXPYQV0NN5CQ.treasury-v2
+            expected-sender: SP3P9R2T7SN8Q9S9K2AACV2D3ZR8CMXPYQV0NN5CQ
+            method: add-signer
+            parameters:
+              - "'SP3JK9N5M8R2V1X7QMWH0K8R0P1X8M6Z8EG35RQ5B"  # Third signer address
+            cost: 30000
+
+    - id: 3
+      transactions:
+        # Whitelist trusted recipients for fast-track withdrawals
+        - contract-call:
+            contract-id: SP3P9R2T7SN8Q9S9K2AACV2D3ZR8CMXPYQV0NN5CQ.treasury-v2
+            expected-sender: SP3P9R2T7SN8Q9S9K2AACV2D3ZR8CMXPYQV0NN5CQ
+            method: add-whitelisted-recipient
+            parameters:
+              - "'SP3P9R2T7SN8Q9S9K2AACV2D3ZR8CMXPYQV0NN5CQ"  # DAO main wallet
+            cost: 30000
+
+# =====================
+# DEPLOYMENT NOTES
+# =====================
+# 
+# Treasury V2 Features:
+# ---------------------
+# 1. Multi-signature approval for withdrawals >= 10,000 STX
+# 2. Time-lock of ~24 hours (144 blocks) for large withdrawals
+# 3. Daily withdrawal limit of 50,000 STX
+# 4. Budget categories: Operations, Development, Marketing, Grants, Emergency
+# 5. Whitelisted recipients for fast-track withdrawals
+# 6. Withdrawal expiry after ~7 days (1008 blocks)
+#
+# Post-Deployment Checklist:
+# --------------------------
+# [ ] Verify contract deployed successfully
+# [ ] Confirm governance contract is set correctly
+# [ ] Add all required multi-sig signers
+# [ ] Set appropriate budget allocations per category
+# [ ] Test deposit functionality
+# [ ] Whitelist trusted recipients
+# [ ] Update frontend to use treasury-v2
+#
+# Migration from Treasury V1:
+# ---------------------------
+# - Treasury V1 remains active for existing approved withdrawals
+# - New proposals should use Treasury V2
+# - Consider emergency withdrawal from V1 to V2 if needed
+#
+# Security Considerations:
+# ------------------------
+# - Only owner can add/remove signers
+# - Required 2 signatures for large withdrawals
+# - Time-lock prevents immediate drainage
+# - Daily limits protect against rapid fund loss
