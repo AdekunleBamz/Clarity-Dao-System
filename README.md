@@ -57,7 +57,7 @@ clarity-dao-system/
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/clarity-dao-system.git
+git clone https://github.com/adekunlebmz/clarity-dao-system.git
 cd clarity-dao-system
 
 # Check contracts
