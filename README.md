@@ -1,157 +1,202 @@
 # Clarity DAO System
 
-A decentralized autonomous organization (DAO) governance system built on Stacks with **Clarity 4**. Features membership tokens, proposal creation & voting, and treasury management with **0.01 STX creator fees**.
+A comprehensive decentralized autonomous organization (DAO) governance system built on **Stacks blockchain** with **Clarity 4**. Features membership tokens, proposal creation & voting, treasury management, staking rewards, bounty programs, and NFT memberships.
 
-## 🏗️ Architecture
+![Stacks](https://img.shields.io/badge/Stacks-Mainnet-blue)
+![Clarity](https://img.shields.io/badge/Clarity-4.0-purple)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-This project consists of 3 smart contracts:
+## 🌟 Features
 
-### 1. `dao-token.clar` - Membership Token
-- **SIP-010** compliant fungible token
-- Token name: "DAO Governance Token" (DAOG)
-- Initial supply: 1,000,000 tokens
-- Minting/burning capabilities
-- Authorized minter system
+- **Token Governance** - SIP-010 compliant DAO tokens with vesting and delegation
+- **Proposal Voting** - Quadratic and conviction voting mechanisms
+- **Treasury Management** - Streaming payments, milestones, and recurring withdrawals
+- **Staking Rewards** - Tiered APY (5-25%) with auto-compound option
+- **Bounty System** - Task-based rewards with reputation tracking
+- **Membership NFTs** - SIP-009 NFTs with tier-based benefits
 
-### 2. `governance.clar` - Proposal & Voting
-- Create proposals (requires 1000+ tokens)
-- Vote on proposals with token-weighted voting
-- 144 block voting period (~1 day)
-- 10% quorum requirement
-- 51% approval threshold
-- Proposal finalization and execution
+## 📦 Deployed Contracts (Mainnet)
 
-### 3. `treasury.clar` - Fund Management
-- STX deposit/withdrawal system
-- **0.01 STX (10,000 micro-STX) creator fee** on transactions
-- Governance-approved withdrawals
-- Emergency withdrawal (owner only)
-- Pause functionality
+| Contract | Address |
+|----------|---------|
+| DAO Token v5.1 | `SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N.dao-token-v5-1` |
+| Governance v5.1 | `SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N.governance-v5-1` |
+| Treasury v5.1 | `SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N.treasury-v5-1` |
+| Staking v5.1 | `SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N.staking-v5-1` |
+| Bounty v5.1 | `SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N.bounty-v5-1` |
+| Membership NFT v5.1 | `SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N.membership-nft-v5-1` |
 
-## 📁 Project Structure
+## 🏗️ Project Structure
 
 ```
 clarity-dao-system/
-├── Clarinet.toml              # Project configuration
-├── README.md                  # This file
-├── contracts/
-│   ├── dao-token.clar         # SIP-010 membership token
-│   ├── governance.clar        # Proposal & voting system
-│   └── treasury.clar          # Fund management
-├── settings/
-│   └── Devnet.toml            # Development network config
-└── tests/
-    ├── dao-token_test.clar    # Token tests
-    ├── governance_test.clar   # Governance tests
-    └── treasury_test.clar     # Treasury tests
+├── contracts/                 # Clarity smart contracts
+│   ├── dao-token-v5.1.clar   # SIP-010 token with vesting
+│   ├── governance-v5.1.clar  # Voting and proposals
+│   ├── treasury-v5.1.clar    # Fund management
+│   ├── staking-v5.1.clar     # Staking rewards
+│   ├── bounty-v5.1.clar      # Bounty program
+│   └── membership-nft-v5.1.clar # NFT memberships
+├── frontend/                  # React + Vite frontend
+│   ├── src/
+│   │   ├── components/       # UI components
+│   │   ├── context/          # React contexts
+│   │   └── config.js         # Configuration
+│   └── package.json
+├── tests/                     # Contract tests
+├── deployments/               # Deployment plans
+└── settings/                  # Network configs
 ```
 
-## 🚀 Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- [Clarinet](https://github.com/hirosystems/clarinet) installed
-- Node.js (for additional tooling)
+- [Clarinet](https://github.com/hirosystems/clarinet) >= 2.0
+- [Node.js](https://nodejs.org/) >= 18
+- [pnpm](https://pnpm.io/) or npm
 
-### Installation
+### Smart Contracts
 
 ```bash
 # Clone the repository
-git clone https://github.com/adekunlebmz/clarity-dao-system.git
-cd clarity-dao-system
+git clone https://github.com/AdekunleBamz/Clarity-Dao-System.git
+cd Clarity-Dao-System
 
-# Check contracts
+# Check contracts compile
 clarinet check
 
 # Run tests
 clarinet test
 
-# Start console for interactive testing
-clarinet console
+# Start local devnet
+clarinet devnet start
 ```
 
-## 💰 Creator Fee
+### Frontend
 
-Every deposit and withdrawal includes a **0.01 STX** creator fee that is automatically sent to the creator address. This provides sustainable funding for ongoing development and maintenance.
+```bash
+cd frontend
 
-| Action | Creator Fee |
-|--------|-------------|
-| Deposit | 0.01 STX |
-| Withdrawal | 0.01 STX |
+# Install dependencies
+npm install
 
-## 📋 Contract Functions
+# Copy environment file
+cp .env.example .env
 
-### DAO Token
+# Add your WalletConnect Project ID to .env
+# Get one at https://cloud.walletconnect.com
 
-| Function | Description |
-|----------|-------------|
-| `transfer` | Transfer tokens between accounts |
-| `mint` | Mint new tokens (authorized only) |
-| `burn` | Burn tokens |
-| `add-minter` | Add authorized minter |
-| `get-balance` | Get token balance |
+# Start development server
+npm run dev
+```
 
-### Governance
+## 🔑 Environment Variables
 
-| Function | Description |
-|----------|-------------|
-| `create-proposal` | Create a new proposal |
-| `vote` | Cast vote on proposal |
-| `finalize-proposal` | Finalize after voting ends |
-| `execute-proposal` | Execute passed proposal |
-| `get-proposal` | Get proposal details |
+Create a `.env` file in the `frontend` directory:
 
-### Treasury
+```env
+# Required for wallet connection
+VITE_WALLETCONNECT_PROJECT_ID=your_project_id
 
-| Function | Description |
-|----------|-------------|
-| `deposit` | Deposit STX (with fee) |
-| `deposit-no-fee` | Deposit without fee |
-| `claim-withdrawal` | Claim approved withdrawal |
-| `get-treasury-balance` | Get current balance |
-| `get-treasury-stats` | Get full statistics |
+# Optional
+VITE_STACKS_NETWORK=mainnet
+VITE_DEBUG=false
+```
+
+## 📜 Contract Features
+
+### DAO Token (v5.1)
+- SIP-010 fungible token standard
+- Token vesting schedules
+- Token locking for governance
+- Snapshot-based voting power
+- Approve/TransferFrom pattern
+
+### Governance (v5.1)
+- Proposal creation with token threshold
+- Delegation of voting power
+- Quadratic voting support
+- Conviction voting mechanism
+- Voter rewards distribution
+
+### Treasury (v5.1)
+- STX and token deposits
+- Streaming payment schedules
+- Milestone-based releases
+- Recurring payments
+- Multi-sig support
+
+### Staking (v5.1)
+- Flexible lock periods (1 month - 2 years)
+- Tiered APY rewards (5% - 25%)
+- Auto-compound option
+- Early unstake penalty (20%)
+- Governance participation bonus
+
+### Bounty (v5.1)
+- Task creation and management
+- Submission and review workflow
+- Dispute resolution
+- Reputation tracking
+- Milestone payments
+
+### Membership NFT (v5.1)
+- SIP-009 NFT standard
+- 5 membership tiers
+- Achievement badges
+- Tier-based voting multipliers
 
 ## 🧪 Testing
 
-Run the test suite:
-
 ```bash
-# Check all contracts compile
-clarinet check
-
 # Run all tests
 clarinet test
 
 # Run specific test file
-clarinet test tests/dao-token_test.clar
+clarinet test tests/governance_test.clar
+
+# Check contract syntax
+clarinet check
 ```
 
-## 🌐 Deployment
+## 🌐 Frontend Stack
 
-### Testnet
+- **React 18** - UI framework
+- **Vite** - Build tool
+- **TailwindCSS** - Styling
+- **React Router** - Navigation
+- **WalletConnect** - Wallet integration
+- **Stacks.js** - Blockchain interaction
 
-```bash
-clarinet deployments generate --testnet
-clarinet deployments apply -p deployments/default.testnet.yaml
-```
+## 📱 Pages
 
-### Mainnet
-
-```bash
-clarinet deployments generate --mainnet
-clarinet deployments apply -p deployments/default.mainnet.yaml
-```
-
-## 📄 License
-
-MIT License - see LICENSE file for details.
+| Page | Description |
+|------|-------------|
+| Dashboard | Overview stats and quick actions |
+| Governance | View and vote on proposals |
+| Treasury | Deposit and view transactions |
+| Tokens | View balance and voting power |
+| Staking | Stake tokens for rewards |
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+2. Create a feature branch (`git checkout -b feat/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feat/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+## 🔗 Resources
+
+- [Stacks Documentation](https://docs.stacks.co)
+- [Clarity Language Reference](https://docs.stacks.co/clarity)
+- [SIP-010 Token Standard](https://github.com/stacksgov/sips/blob/main/sips/sip-010/sip-010-fungible-token-standard.md)
+- [SIP-009 NFT Standard](https://github.com/stacksgov/sips/blob/main/sips/sip-009/sip-009-nft-standard.md)
 
 ---
 
