@@ -1,0 +1,51 @@
+{
+  "name": "Clarity DAO",
+  "short_name": "ClarityDAO",
+  "description": "Decentralized governance on Stacks blockchain",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "productivity"],
+  "screenshots": [
+    {
+      "src": "/screenshot-dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "Dashboard view"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Governance",
+      "short_name": "Vote",
+      "description": "View and vote on proposals",
+      "url": "/governance",
+      "icons": [{ "src": "/icon-governance.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Treasury",
+      "short_name": "Treasury",
+      "description": "View treasury balance",
+      "url": "/treasury",
+      "icons": [{ "src": "/icon-treasury.png", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
