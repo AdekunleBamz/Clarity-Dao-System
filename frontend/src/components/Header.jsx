@@ -10,7 +10,10 @@ export default function Header() {
     { path: '/', label: 'Dashboard' },
     { path: '/governance', label: 'Governance' },
     { path: '/treasury', label: 'Treasury' },
-    { path: '/tokens', label: 'Tokens' }
+    { path: '/tokens', label: 'Tokens' },
+    { path: '/staking', label: 'Staking' },
+    { path: '/bounty', label: 'Bounties' },
+    { path: '/membership', label: 'NFTs' }
   ]
 
   return (
