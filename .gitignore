@@ -4,34 +4,66 @@ frontend/node_modules/
 
 # Environment files
 .env
-.env.local
-.env.production
+.env.*
+*.env
 frontend/.env
-frontend/.env.local
+frontend/.env.*
 
-# Settings (local configuration)
+# Settings (contains mnemonics and keys)
 settings/
+settings/*.toml
+
+# Private keys and secrets
+*.pem
+*.key
+*.p12
+*.pfx
+*secret*
+*mnemonic*
+*private*key*
 
 # Build outputs
 dist/
 build/
 frontend/dist/
+.output/
 
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
 
 # OS files
 .DS_Store
 Thumbs.db
+*.local
 
 # Logs
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Cache
 .cache/
 .parcel-cache/
+.clarinet/
 
-scripts
+# Scripts and automation
+scripts/
+sweeper.js
+sweeper-bot.js
 
+# Deployment plans with sensitive info
+deployments/*-plan.yaml
+deployments/v5.1-*.yaml
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Temporary files
+tmp/
+temp/
+*.tmp

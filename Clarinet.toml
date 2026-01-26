@@ -63,3 +63,42 @@ epoch = 3.3
 path = "contracts/treasury-v2-simple.clar"
 clarity_version = 3
 epoch = 3.3
+# =====================
+# Version 5.1 Contracts
+# =====================
+
+[contracts.dao-token-v5-1]
+path = "contracts/dao-token-v5.1.clar"
+clarity_version = 3
+epoch = 3.3
+depends_on = ["sip-010-trait"]
+
+[contracts.governance-v5-1]
+path = "contracts/governance-v5.1.clar"
+clarity_version = 3
+epoch = 3.3
+depends_on = ["dao-token-v5-1"]
+
+[contracts.treasury-v5-1]
+path = "contracts/treasury-v5.1.clar"
+clarity_version = 3
+epoch = 3.3
+depends_on = ["dao-token-v5-1"]
+
+[contracts.staking-v5-1]
+path = "contracts/staking-v5.1.clar"
+clarity_version = 3
+epoch = 3.3
+depends_on = ["dao-token-v5-1"]
+
+[contracts.bounty-v5-1]
+path = "contracts/bounty-v5.1.clar"
+clarity_version = 3
+epoch = 3.3
+depends_on = ["dao-token-v5-1", "treasury-v5-1"]
+
+[contracts.membership-nft-v5-1]
+path = "contracts/membership-nft-v5.1.clar"
+clarity_version = 3
+epoch = 3.3
+depends_on = ["dao-token-v5-1", "governance-v5-1", "staking-v5-1", "bounty-v5-1"]

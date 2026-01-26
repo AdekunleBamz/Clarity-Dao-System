@@ -11,36 +11,113 @@ plan:
         - contract-publish:
             contract-name: sip-010-trait
             expected-sender: SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N
-            cost: 7480
+            cost: 16160482
             path: contracts/sip-010-trait.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: dao-token-v5-1
+            expected-sender: SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N
+            cost: 16212035
+            path: contracts/dao-token-v5.1.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: bounty-v5-1
+            expected-sender: SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N
+            cost: 16218644
+            path: contracts/bounty-v5.1.clar
             anchor-block-only: true
             clarity-version: 3
         - contract-publish:
             contract-name: dao-token
             expected-sender: SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N
-            cost: 59550
+            cost: 16177005
             path: contracts/dao-token.clar
             anchor-block-only: true
             clarity-version: 3
         - contract-publish:
             contract-name: governance
             expected-sender: SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N
-            cost: 85890
+            cost: 16185598
             path: contracts/governance.clar
             anchor-block-only: true
             clarity-version: 3
         - contract-publish:
             contract-name: governance-v2
             expected-sender: SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N
-            cost: 197680
+            cost: 8478443
             path: contracts/governance-v2.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: governance-v3
+            expected-sender: SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N
+            cost: 8478443
+            path: contracts/governance-v3.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: governance-v4
+            expected-sender: SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N
+            cost: 8478443
+            path: contracts/governance-v4.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: governance-v5-1
+            expected-sender: SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N
+            cost: 8481898
+            path: contracts/governance-v5.1.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: membership-nft-v5-1
+            expected-sender: SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N
+            cost: 8478789
+            path: contracts/membership-nft-v5.1.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: staking-v5-1
+            expected-sender: SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N
+            cost: 8475680
+            path: contracts/staking-v5.1.clar
             anchor-block-only: true
             clarity-version: 3
         - contract-publish:
             contract-name: treasury
             expected-sender: SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N
-            cost: 83090
+            cost: 8459443
             path: contracts/treasury.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: treasury-upgrade
+            expected-sender: SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N
+            cost: 8469116
+            path: contracts/treasury-upgrade.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: treasury-v2
+            expected-sender: SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N
+            cost: 4608666
+            path: contracts/treasury-v2.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: treasury-v2-simple
+            expected-sender: SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N
+            cost: 4598340
+            path: contracts/treasury-v2-simple.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: treasury-v5-1
+            expected-sender: SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N
+            cost: 4611482
+            path: contracts/treasury-v5.1.clar
             anchor-block-only: true
             clarity-version: 3
       epoch: "3.3"
