@@ -4,13 +4,41 @@
  */
 
 // Base skeleton with shimmer animation
-export function Skeleton({ className = '', ...props }) {
+export function Skeleton({ className = '', animate = true, ...props }) {
+  const animationClass = animate ? 'animate-pulse' : ''
   return (
     <div
-      className={`animate-pulse bg-gray-200 dark:bg-gray-700 rounded ${className}`}
+      className={`${animationClass} bg-gray-200 dark:bg-gray-700 rounded ${className}`}
       {...props}
     />
   )
+}
+
+// Button skeleton
+export function SkeletonButton({ size = 'md', className = '' }) {
+  const sizes = {
+    sm: 'h-8 w-16',
+    md: 'h-10 w-24',
+    lg: 'h-12 w-32',
+    xl: 'h-14 w-40'
+  }
+  return <Skeleton className={`rounded-lg ${sizes[size]} ${className}`} />
+}
+
+// Heading skeleton
+export function SkeletonHeading({ size = 'md', className = '' }) {
+  const sizes = {
+    sm: 'h-5 w-32',
+    md: 'h-7 w-48',
+    lg: 'h-9 w-64',
+    xl: 'h-11 w-80'
+  }
+  return <Skeleton className={`rounded ${sizes[size]} ${className}`} />
+}
+
+// Input field skeleton
+export function SkeletonInput({ className = '' }) {
+  return <Skeleton className={`h-10 w-full rounded-lg ${className}`} />
 }
 
 // Text skeleton with varying widths
