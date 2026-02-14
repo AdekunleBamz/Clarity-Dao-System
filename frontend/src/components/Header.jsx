@@ -17,12 +17,12 @@ export default function Header() {
   ]
 
   return (
-    <header className="bg-white dark:bg-gray-800 shadow-md">
+    <header className="bg-white dark:bg-gray-800 shadow-md" role="banner">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-8">
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+            <Link to="/" className="flex items-center space-x-2" aria-label="Clarity DAO home">
+              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center" aria-hidden="true">
                 <span className="text-white font-bold text-lg">C</span>
               </div>
               <span className="font-bold text-xl text-gray-900 dark:text-white">
@@ -30,7 +30,7 @@ export default function Header() {
               </span>
             </Link>
 
-            <nav className="hidden md:flex space-x-6">
+            <nav className="hidden md:flex space-x-6" aria-label="Main navigation">
               {navItems.map((item) => (
                 <Link
                   key={item.path}
