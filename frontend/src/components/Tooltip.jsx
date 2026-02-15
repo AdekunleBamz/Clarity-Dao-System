@@ -1,27 +1,130 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback, cloneElement } from 'react'
 import { createPortal } from 'react-dom'
 
-const POSITIONS = {
-  top: 'bottom-full left-1/2 -translate-x-1/2 mb-2',
-  bottom: 'top-full left-1/2 -translate-x-1/2 mt-2',
-  left: 'right-full top-1/2 -translate-y-1/2 mr-2',
-  right: 'left-full top-1/2 -translate-y-1/2 ml-2',
+/**
+ * Calculate tooltip position relative to trigger element
+ */
+function calculatePosition(triggerRect, tooltipRect, position, offset = 8) {
+  const positions = {
+    top: {
+      top: triggerRect.top - tooltipRect.height - offset,
+      left: triggerRect.left + (triggerRect.width - tooltipRect.width) / 2,
+    },
+    bottom: {
+      top: triggerRect.bottom + offset,
+      left: triggerRect.left + (triggerRect.width - tooltipRect.width) / 2,
+    },
+    left: {
+      top: triggerRect.top + (triggerRect.height - tooltipRect.height) / 2,
+      left: triggerRect.left - tooltipRect.width - offset,
+    },
+    right: {
+      top: triggerRect.top + (triggerRect.height - tooltipRect.height) / 2,
+      left: triggerRect.right + offset,
+    },
+    'top-start': {
+      top: triggerRect.top - tooltipRect.height - offset,
+      left: triggerRect.left,
+    },
+    'top-end': {
+      top: triggerRect.top - tooltipRect.height - offset,
+      left: triggerRect.right - tooltipRect.width,
+    },
+    'bottom-start': {
+      top: triggerRect.bottom + offset,
+      left: triggerRect.left,
+    },
+    'bottom-end': {
+      top: triggerRect.bottom + offset,
+      left: triggerRect.right - tooltipRect.width,
+    },
+  }
+
+  let pos = positions[position] || positions.top
+  
+  // Ensure tooltip stays within viewport
+  const viewportWidth = window.innerWidth
+  const viewportHeight = window.innerHeight
+  
+  // Horizontal bounds
+  if (pos.left < 8) pos.left = 8
+  if (pos.left + tooltipRect.width > viewportWidth - 8) {
+    pos.left = viewportWidth - tooltipRect.width - 8
+  }
+  
+  // Vertical bounds - flip if necessary
+  if (pos.top < 8 && position.startsWith('top')) {
+    pos = calculatePosition(triggerRect, tooltipRect, position.replace('top', 'bottom'), offset)
+  } else if (pos.top + tooltipRect.height > viewportHeight - 8 && position.startsWith('bottom')) {
+    pos = calculatePosition(triggerRect, tooltipRect, position.replace('bottom', 'top'), offset)
+  }
+
+  return pos
 }
 
-const ARROW_POSITIONS = {
-  top: 'top-full left-1/2 -translate-x-1/2 border-t-gray-900 dark:border-t-gray-700 border-l-transparent border-r-transparent border-b-transparent',
-  bottom: 'bottom-full left-1/2 -translate-x-1/2 border-b-gray-900 dark:border-b-gray-700 border-l-transparent border-r-transparent border-t-transparent',
-  left: 'left-full top-1/2 -translate-y-1/2 border-l-gray-900 dark:border-l-gray-700 border-t-transparent border-b-transparent border-r-transparent',
-  right: 'right-full top-1/2 -translate-y-1/2 border-r-gray-900 dark:border-r-gray-700 border-t-transparent border-b-transparent border-l-transparent',
+/**
+ * Get arrow styles based on position
+ */
+function getArrowStyles(position) {
+  const arrowBase = {
+    position: 'absolute',
+    width: 0,
+    height: 0,
+    borderStyle: 'solid',
+  }
+
+  const arrowStyles = {
+    top: {
+      ...arrowBase,
+      bottom: '-6px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      borderWidth: '6px 6px 0 6px',
+      borderColor: 'rgb(17 24 39) transparent transparent transparent',
+    },
+    bottom: {
+      ...arrowBase,
+      top: '-6px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      borderWidth: '0 6px 6px 6px',
+      borderColor: 'transparent transparent rgb(17 24 39) transparent',
+    },
+    left: {
+      ...arrowBase,
+      right: '-6px',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      borderWidth: '6px 0 6px 6px',
+      borderColor: 'transparent transparent transparent rgb(17 24 39)',
+    },
+    right: {
+      ...arrowBase,
+      left: '-6px',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      borderWidth: '6px 6px 6px 0',
+      borderColor: 'transparent rgb(17 24 39) transparent transparent',
+    },
+  }
+
+  const basePosition = position.split('-')[0]
+  return arrowStyles[basePosition] || arrowStyles.top
 }
 
+/**
+ * Tooltip component
+ */
 export default function Tooltip({
   children,
   content,
   position = 'top',
   delay = 200,
+  offset = 8,
   disabled = false,
+  showArrow = true,
   className = '',
+  maxWidth = 250,
 }) {
   const [isVisible, setIsVisible] = useState(false)
   const [coords, setCoords] = useState({ top: 0, left: 0 })
@@ -29,6 +132,44 @@ export default function Tooltip({
   const tooltipRef = useRef(null)
   const timeoutRef = useRef(null)
 
+  const showTooltip = useCallback(() => {
+    if (disabled) return
+    
+    timeoutRef.current = setTimeout(() => {
+      setIsVisible(true)
+    }, delay)
+  }, [delay, disabled])
+
+  const hideTooltip = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+    }
+    setIsVisible(false)
+  }, [])
+
+  // Update position when visible
+  useEffect(() => {
+    if (!isVisible || !triggerRef.current || !tooltipRef.current) return
+
+    const updatePosition = () => {
+      const triggerRect = triggerRef.current.getBoundingClientRect()
+      const tooltipRect = tooltipRef.current.getBoundingClientRect()
+      const newCoords = calculatePosition(triggerRect, tooltipRect, position, offset)
+      setCoords(newCoords)
+    }
+
+    updatePosition()
+    
+    window.addEventListener('scroll', updatePosition, true)
+    window.addEventListener('resize', updatePosition)
+
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true)
+      window.removeEventListener('resize', updatePosition)
+    }
+  }, [isVisible, position, offset])
+
+  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -37,67 +178,47 @@ export default function Tooltip({
     }
   }, [])
 
-  const showTooltip = () => {
-    if (disabled) return
-    timeoutRef.current = setTimeout(() => {
-      if (triggerRef.current) {
-        const rect = triggerRef.current.getBoundingClientRect()
-        setCoords({
-          top: rect.top + window.scrollY,
-          left: rect.left + window.scrollX,
-          width: rect.width,
-          height: rect.height,
-        })
-      }
-      setIsVisible(true)
-    }, delay)
-  }
-
-  const hideTooltip = () => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-    }
-    setIsVisible(false)
-  }
-
-  if (!content) {
-    return children
-  }
+  // Clone child and add event handlers
+  const trigger = cloneElement(children, {
+    ref: triggerRef,
+    onMouseEnter: (e) => {
+      showTooltip()
+      children.props.onMouseEnter?.(e)
+    },
+    onMouseLeave: (e) => {
+      hideTooltip()
+      children.props.onMouseLeave?.(e)
+    },
+    onFocus: (e) => {
+      showTooltip()
+      children.props.onFocus?.(e)
+    },
+    onBlur: (e) => {
+      hideTooltip()
+      children.props.onBlur?.(e)
+    },
+    'aria-describedby': isVisible ? 'tooltip' : undefined,
+  })
 
   return (
     <>
-      <span
-        ref={triggerRef}
-        onMouseEnter={showTooltip}
-        onMouseLeave={hideTooltip}
-        onFocus={showTooltip}
-        onBlur={hideTooltip}
-        className={`inline-block ${className}`}
-      >
-        {children}
-      </span>
-      
-      {isVisible && createPortal(
+      {trigger}
+      {isVisible && content && createPortal(
         <div
           ref={tooltipRef}
+          id="tooltip"
           role="tooltip"
-          className="fixed z-50 pointer-events-none"
           style={{
-            top: position === 'bottom' ? coords.top + coords.height + 8 :
-                 position === 'top' ? coords.top - 8 :
-                 coords.top + coords.height / 2,
-            left: position === 'right' ? coords.left + coords.width + 8 :
-                  position === 'left' ? coords.left - 8 :
-                  coords.left + coords.width / 2,
-            transform: position === 'top' ? 'translate(-50%, -100%)' :
-                       position === 'bottom' ? 'translate(-50%, 0)' :
-                       position === 'left' ? 'translate(-100%, -50%)' :
-                       'translate(0, -50%)',
+            position: 'fixed',
+            top: coords.top,
+            left: coords.left,
+            zIndex: 9999,
+            maxWidth,
           }}
+          className={`px-3 py-2 text-sm text-white bg-gray-900 rounded-lg shadow-lg animate-fadeIn ${className}`}
         >
-          <div className="px-3 py-2 text-sm text-white bg-gray-900 dark:bg-gray-700 rounded-lg shadow-lg whitespace-nowrap">
-            {content}
-          </div>
+          {content}
+          {showArrow && <div style={getArrowStyles(position)} />}
         </div>,
         document.body
       )}
@@ -108,79 +229,67 @@ export default function Tooltip({
 /**
  * Info tooltip with icon
  */
-export function InfoTooltip({ content, iconSize = 'sm' }) {
-  const sizes = {
-    sm: 'w-4 h-4',
-    md: 'w-5 h-5',
-    lg: 'w-6 h-6',
-  }
-
+export function InfoTooltip({ content, position = 'top', className = '' }) {
   return (
-    <Tooltip content={content}>
-      <svg
-        className={`${sizes[iconSize]} text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help inline-block`}
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
+    <Tooltip content={content} position={position}>
+      <button
+        type="button"
+        className={`inline-flex items-center justify-center w-4 h-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors ${className}`}
+        aria-label="More information"
       >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
+        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path
+            fillRule="evenodd"
+            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+            clipRule="evenodd"
+          />
+        </svg>
+      </button>
     </Tooltip>
   )
 }
 
 /**
- * Tooltip for addresses with copy functionality
+ * Truncated text with tooltip showing full text
  */
-export function AddressTooltip({ address, children }) {
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(address)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
-      console.error('Failed to copy:', err)
-    }
+export function TruncatedText({ text, maxLength = 20, className = '' }) {
+  if (!text || text.length <= maxLength) {
+    return <span className={className}>{text}</span>
   }
+
+  const truncated = `${text.slice(0, maxLength)}...`
+
+  return (
+    <Tooltip content={text} maxWidth={400}>
+      <span className={`cursor-help ${className}`}>{truncated}</span>
+    </Tooltip>
+  )
+}
+
+/**
+ * Address tooltip for Stacks addresses
+ */
+export function AddressTooltip({ address, className = '' }) {
+  if (!address) return null
+
+  const truncated = `${address.slice(0, 6)}...${address.slice(-4)}`
 
   return (
     <Tooltip
       content={
-        <span className="flex items-center gap-2">
-          <span className="font-mono">{address}</span>
-          <button onClick={handleCopy} className="pointer-events-auto">
-            {copied ? '✓' : '📋'}
-          </button>
-        </span>
+        <div className="font-mono text-xs break-all">
+          {address}
+          <p className="mt-1 text-gray-400">Click to copy</p>
+        </div>
       }
+      maxWidth={350}
     >
-      {children}
-    </Tooltip>
-  )
-}
-
-/**
- * Simple inline tooltip
- */
-export function SimpleTooltip({ text, children, position = 'top' }) {
-  return (
-    <span className="relative group inline-block">
-      {children}
-      <span
-        className={`absolute ${POSITIONS[position]} z-50 px-2 py-1 text-xs text-white bg-gray-900 dark:bg-gray-700 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none`}
+      <button
+        onClick={() => navigator.clipboard.writeText(address)}
+        className={`font-mono text-sm text-purple-600 dark:text-purple-400 hover:underline ${className}`}
       >
-        {text}
-        <span
-          className={`absolute ${ARROW_POSITIONS[position]} border-4`}
-        />
-      </span>
-    </span>
+        {truncated}
+      </button>
+    </Tooltip>
   )
 }
