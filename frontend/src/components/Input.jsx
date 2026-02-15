@@ -6,6 +6,9 @@ const SIZES = {
   lg: 'px-4 py-3 text-base',
 }
 
+/**
+ * Enhanced Input component with real-time validation feedback
+ */
 const Input = forwardRef(function Input(
   {
     label,
@@ -17,11 +20,17 @@ const Input = forwardRef(function Input(
     fullWidth = true,
     className = '',
     containerClassName = '',
+    validator,
+    onValidate,
     ...props
   },
   ref
 ) {
-  const hasError = !!error
+  const [touched, setTouched] = useState(false)
+  const [localError, setLocalError] = useState(null)
+
+  const hasError = !!error || !!localError
+  const displayError = error || (touched ? localError : null)
   const widthClass = fullWidth ? 'w-full' : ''
   
   const baseClasses = `block rounded-lg border bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 transition-colors ${SIZES[size]}`
@@ -31,6 +40,25 @@ const Input = forwardRef(function Input(
     : 'border-gray-300 dark:border-gray-600 focus:border-purple-500 focus:ring-purple-500/20'
   
   const paddingClasses = `${leftIcon ? 'pl-10' : ''} ${rightIcon ? 'pr-10' : ''}`
+
+  const handleChange = (e) => {
+    if (validator && touched) {
+      const error = validator(e.target.value)
+      setLocalError(error)
+      onValidate?.(e.target.value, error)
+    }
+    props.onChange?.(e)
+  }
+
+  const handleBlur = (e) => {
+    setTouched(true)
+    if (validator) {
+      const error = validator(e.target.value)
+      setLocalError(error)
+      onValidate?.(e.target.value, error)
+    }
+    props.onBlur?.(e)
+  }
 
   return (
     <div className={`${fullWidth ? 'w-full' : ''} ${containerClassName}`}>
@@ -52,7 +80,9 @@ const Input = forwardRef(function Input(
           ref={ref}
           className={`${baseClasses} ${stateClasses} ${paddingClasses} ${widthClass} ${className}`}
           aria-invalid={hasError}
-          aria-describedby={error ? `${props.id || props.name}-error` : undefined}
+          aria-describedby={displayError ? `${props.id || props.name}-error` : undefined}
+          onChange={handleChange}
+          onBlur={handleBlur}
           {...props}
         />
         
@@ -63,13 +93,14 @@ const Input = forwardRef(function Input(
         )}
       </div>
       
-      {error && (
-        <p id={`${props.id || props.name}-error`} className="mt-1.5 text-sm text-red-600 dark:text-red-400">
-          {error}
+      {displayError && (
+        <p id={`${props.id || props.name}-error`} className="mt-1.5 text-sm text-red-600 dark:text-red-400 flex items-center">
+          <span className="mr-1">⚠️</span>
+          {displayError}
         </p>
       )}
       
-      {hint && !error && (
+      {hint && !displayError && (
         <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">{hint}</p>
       )}
     </div>
