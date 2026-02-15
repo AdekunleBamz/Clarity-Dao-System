@@ -169,7 +169,65 @@ clarinet check
 - **WalletConnect** - Wallet integration
 - **Stacks.js** - Blockchain interaction
 
-## 📱 Pages
+## �️ Frontend Utilities & Hooks (PRs 1-43)
+
+### Data Fetching & State Management (PR 01-05)
+- **React Query Integration** - `useSTXBalance`, `useDAOBalance`, `useTransactionHistory`, `useAccountInfo` hooks for efficient data fetching with caching
+- **Error Handling** - `ErrorHandler` class with standardized error parsing and `useErrorHandler` hook for user-friendly error messages
+- **Form State Management** - `useForm` hook with complete form handling, validation tracking, and field management
+- **Input Validation** - Reusable validators for email, Stacks addresses, token amounts, string lengths, and custom patterns
+- **API Request Utils** - `APIClient` class with automatic retry logic, timeout handling, and centralized HTTP methods (GET/POST/PUT/DELETE)
+
+### Storage & Performance (PR 06-07)
+- **Storage Manager** - LocalStorage wrapper with expiry support and atomic `set`/`get`/`remove`/`clear` operations
+- **Performance Utilities** - `debounce()` and `throttle()` functions with `useDebounce` hook for optimized event handlers
+
+### Utilities & Services (PR 08-10)
+- **Date Formatting** - `dateUtils.format()` and `dateUtils.timeAgo()` functions for consistent date handling across the app
+- **Logger Service** - Centralized `Logger` class with `log()`, `debug()`, `error()`, and `warn()` methods for debugging
+- **Notifications** - `useNotifications` hook for toast-like notifications with `success()`, `error()`, `warning()`, and `info()` shortcuts
+
+### Data Management Hooks (PR 11-20)
+10 essential hooks in `useDataHooks.js`:
+- `usePagination` - Pagination state and navigation
+- `useSearch` - Text search with memoized filtering
+- `useFilter` - Dynamic filtering for complex datasets
+- `useSort` - Ascending/descending sort functionality
+- `useAsync` - Async operation state management
+- `useWindowSize` - Responsive window size tracking
+- `usePrevious` - Track previous values in state
+- `useToggle` - Simple boolean toggle hook
+- `useCounter` - Increment/decrement counter utility
+- `useLocalStorage` - Persistent state with localStorage sync
+
+### Advanced UI & Styling Utilities (PR 21-43)
+Theme, animation, and React hook utilities in `allUtilities.js`:
+- **Theme Manager** - Centralized color palette, spacing scale, and breakpoint configuration
+- **Color Utilities** - `lighten()`, `darken()`, and `setAlpha()` functions for dynamic color manipulation
+- **Accessibility** - Screen reader announcements and focus trap utilities for keyboard navigation
+- **Animation Utilities** - Pre-configured fade-in, slide-in, and bounce animations
+- **String Utilities** - `truncate()`, `capitalize()`, `camelToKebab()`, `kebabToCamel()` text transformations
+- **Number Formatting** - `formatCurrency()`, `formatNumber()`, `abbreviate()` for consistent number display
+- **Array & Object Utilities** - `unique()`, `chunk()`, `flatten()`, `groupBy()`, `pick()`, `omit()`, `merge()`, `deepClone()`
+- **CSS Helper** - `clsx()` utility for dynamic class name composition
+- **UI Hooks** (15 advanced):
+  - `useMediaQuery` - Responsive CSS media query detection
+  - `useClickOutside` - Detect clicks outside elements  
+  - `useKeyboardShortcut` - Handle keyboard shortcuts
+  - `useIntersectionObserver` - Intersection detection for animations
+  - `useFetch` - Simple fetch hook for API calls
+  - `useMounted` - Prevent state updates on unmounted components
+  - `useStateHistory` - Track state history with undo/redo
+  - `useFocusLock` - Lock focus within modal/drawer elements
+  - `usePromise` - Promise state management
+  - `useDeepMemo` - Deep equality memoization
+  - `useAnimationFrame` - RequestAnimationFrame management
+  - `useRafState` - State updates via RAF for smooth animations
+  - `useRefState` - Combined ref and state hook
+
+All utilities follow React best practices and integrate seamlessly with @stacks/connect and @stacks/transactions for blockchain operations.
+
+## �📱 Pages
 
 | Page | Description |
 |------|-------------|
