@@ -317,3 +317,4 @@ export function EmptyStateCard({
     </Card>
   )
 }
+improved card spacing
