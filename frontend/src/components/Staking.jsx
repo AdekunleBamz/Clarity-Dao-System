@@ -1,231 +1,355 @@
-import { useState, useContext } from 'react'
-import { WalletContext } from '../context/WalletContext'
+import { useState, useEffect, useCallback } from 'react'
+import { useWallet } from '../context/WalletContext'
 
-const STAKING_TIERS = [
-  { tier: 1, name: 'Bronze', minStake: 100, apy: 5, lockDays: 7 },
-  { tier: 2, name: 'Silver', minStake: 1000, apy: 10, lockDays: 30 },
-  { tier: 3, name: 'Gold', minStake: 5000, apy: 15, lockDays: 90 },
-  { tier: 4, name: 'Platinum', minStake: 10000, apy: 20, lockDays: 180 },
-  { tier: 5, name: 'Diamond', minStake: 50000, apy: 25, lockDays: 365 },
+// Match contract constants
+const DURATIONS = [
+  { blocks: 4320, label: '1 Month', rate: 500 },      // 5% APY
+  { blocks: 12960, label: '3 Months', rate: 800 },    // 8% APY
+  { blocks: 25920, label: '6 Months', rate: 1200 },   // 12% APY
+  { blocks: 51840, label: '1 Year', rate: 1800 },     // 18% APY
+  { blocks: 103680, label: '2 Years', rate: 2500 },   // 25% APY
 ]
 
-const TIER_ICONS = ['🥉', '🥈', '🥇', '💎', '👑']
-
 export default function Staking() {
-  const { address, isConnected } = useContext(WalletContext)
+  const { isConnected, address, daoBalance, contracts, callReadOnly } = useWallet()
+  const [activeTab, setActiveTab] = useState('stake')
   const [stakeAmount, setStakeAmount] = useState('')
-  const [selectedTier, setSelectedTier] = useState(null)
-  const [isStaking, setIsStaking] = useState(false)
+  const [selectedDuration, setSelectedDuration] = useState(DURATIONS[0])
+  const [userStakes, setUserStakes] = useState([])
+  const [totalStaked, setTotalStaked] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [submitting, setSubmitting] = useState(false)
 
-  const userStake = {
-    amount: 2500,
-    tier: 2,
-    startBlock: 150000,
-    endBlock: 154320,
-    rewards: 45.5,
-    autoCompound: true,
-  }
+  // Fetch staking data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        // In production, these would be contract calls via callReadOnly
+        // For now, show realistic placeholder data
+        setTotalStaked(125000)
+        setUserStakes([])
+        setError(null)
+      } catch (err) {
+        setError('Failed to load staking data')
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [address, contracts])
+
+  // Calculate estimated rewards
+  const calculateRewards = useCallback((amount, duration) => {
+    if (!amount || isNaN(amount)) return 0
+    const rate = duration.rate / 10000 // Convert basis points to decimal
+    const periods = duration.blocks / 51840 // Normalize to 1 year
+    return (amount * rate * periods).toFixed(2)
+  }, [])
 
   const handleStake = async () => {
-    if (!isConnected || !stakeAmount || !selectedTier) return
-    setIsStaking(true)
-    
+    if (!stakeAmount || parseFloat(stakeAmount) <= 0) {
+      setError('Please enter a valid amount')
+      return
+    }
+
+    setSubmitting(true)
+    setError(null)
+
     try {
-      // Staking contract call would go here
-      console.log(`Staking ${stakeAmount} tokens at tier ${selectedTier}`)
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      setStakeAmount('')
-      setSelectedTier(null)
-    } catch (error) {
-      console.error('Staking failed:', error)
+      // In production: build and sign transaction
+      // const tx = await buildStakeTransaction(stakeAmount, selectedDuration.blocks)
+      // await signTransaction(tx)
+      console.log('Staking:', stakeAmount, 'for', selectedDuration.label)
+      alert(`Staking ${stakeAmount} DAO for ${selectedDuration.label}\n\nNote: Transaction signing not yet implemented. Connect to a wallet that supports stx_signTransaction.`)
+    } catch (err) {
+      setError(err.message || 'Failed to stake')
     } finally {
-      setIsStaking(false)
+      setSubmitting(false)
     }
   }
 
-  const handleUnstake = async () => {
-    if (!isConnected) return
-    console.log('Unstaking...')
+  const handleUnstake = async (stakeId) => {
+    setSubmitting(true)
+    try {
+      console.log('Unstaking:', stakeId)
+      alert('Unstake transaction would be signed here')
+    } catch (err) {
+      setError(err.message || 'Failed to unstake')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const handleClaimRewards = async () => {
-    if (!isConnected) return
-    console.log('Claiming rewards...')
+    setSubmitting(true)
+    try {
+      console.log('Claiming rewards')
+      alert('Claim rewards transaction would be signed here')
+    } catch (err) {
+      setError(err.message || 'Failed to claim')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
-  const calculateEstimatedRewards = () => {
-    if (!stakeAmount || !selectedTier) return 0
-    const tier = STAKING_TIERS.find(t => t.tier === selectedTier)
-    if (!tier) return 0
-    const amount = parseFloat(stakeAmount)
-    return ((amount * tier.apy) / 100 * (tier.lockDays / 365)).toFixed(2)
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Staking</h1>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="card animate-pulse">
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-2" />
+              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+            </div>
+          ))}
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Staking
-        </h1>
-        {isConnected && userStake.amount > 0 && (
-          <div className="flex items-center gap-2 px-3 py-1 bg-purple-100 dark:bg-purple-900/30 rounded-full">
-            <span className="text-lg">{TIER_ICONS[userStake.tier - 1]}</span>
-            <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
-              {STAKING_TIERS[userStake.tier - 1].name} Tier
-            </span>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Staking</h1>
+        <div className="flex items-center gap-4 text-sm">
+          <div className="px-3 py-1 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-full">
+            <span className="font-medium">TVL:</span> {totalStaked?.toLocaleString() || '—'} DAO
           </div>
-        )}
+          {isConnected && daoBalance !== null && (
+            <div className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full">
+              <span className="font-medium">Your Balance:</span> {daoBalance.toLocaleString()} DAO
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Current Stake Card */}
-      {isConnected && userStake.amount > 0 && (
-        <div className="bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl p-6 text-white">
-          <h2 className="text-lg font-semibold mb-4">Your Stake</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <p className="text-purple-200 text-sm">Staked Amount</p>
-              <p className="text-2xl font-bold">{userStake.amount.toLocaleString()} DAO</p>
-            </div>
-            <div>
-              <p className="text-purple-200 text-sm">Current APY</p>
-              <p className="text-2xl font-bold">{STAKING_TIERS[userStake.tier - 1].apy}%</p>
-            </div>
-            <div>
-              <p className="text-purple-200 text-sm">Pending Rewards</p>
-              <p className="text-2xl font-bold">{userStake.rewards} DAO</p>
-            </div>
-            <div>
-              <p className="text-purple-200 text-sm">Auto-Compound</p>
-              <p className="text-2xl font-bold">{userStake.autoCompound ? 'On' : 'Off'}</p>
-            </div>
-          </div>
-          <div className="flex gap-3 mt-6">
-            <button
-              onClick={handleClaimRewards}
-              className="flex-1 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg font-medium transition-colors"
-            >
-              Claim Rewards
-            </button>
-            <button
-              onClick={handleUnstake}
-              className="flex-1 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg font-medium transition-colors"
-            >
-              Unstake
-            </button>
-          </div>
+      {/* Error display */}
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <p className="text-red-600 dark:text-red-400">{error}</p>
         </div>
       )}
 
-      {/* Staking Tiers */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Staking Tiers
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          {STAKING_TIERS.map((tier) => (
+      {/* Staking pools overview */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {DURATIONS.slice(0, 3).map((dur, i) => (
+          <div 
+            key={dur.blocks} 
+            className={`card cursor-pointer transition-all ${selectedDuration.blocks === dur.blocks ? 'ring-2 ring-primary-500' : 'hover:shadow-lg'}`}
+            onClick={() => setSelectedDuration(dur)}
+            role="button"
+            tabIndex={0}
+            aria-pressed={selectedDuration.blocks === dur.blocks}
+            onKeyDown={(e) => e.key === 'Enter' && setSelectedDuration(dur)}
+          >
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="font-semibold text-gray-900 dark:text-white">{dur.label}</h3>
+              <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-full text-xs font-bold">
+                {(dur.rate / 100).toFixed(0)}% APY
+              </span>
+            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Lock for {dur.label.toLowerCase()} to earn rewards
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* Main staking card */}
+      <div className="card">
+        {/* Tabs */}
+        <div className="flex border-b border-gray-200 dark:border-gray-700 mb-6" role="tablist">
+          {['stake', 'unstake', 'rewards'].map(tab => (
             <button
-              key={tier.tier}
-              onClick={() => setSelectedTier(tier.tier)}
-              className={`p-4 rounded-xl border-2 transition-all ${
-                selectedTier === tier.tier
-                  ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
-                  : 'border-gray-200 dark:border-gray-700 hover:border-purple-300'
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              role="tab"
+              aria-selected={activeTab === tab}
+              className={`px-4 py-2 text-sm font-medium capitalize border-b-2 transition-colors ${
+                activeTab === tab 
+                  ? 'border-primary-600 text-primary-600' 
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
-              <div className="text-3xl mb-2">{TIER_ICONS[tier.tier - 1]}</div>
-              <h3 className="font-semibold text-gray-900 dark:text-white">{tier.name}</h3>
-              <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{tier.apy}% APY</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Min: {tier.minStake.toLocaleString()} DAO
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Lock: {tier.lockDays} days
-              </p>
+              {tab}
             </button>
           ))}
         </div>
-      </div>
 
-      {/* Stake Form */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Stake Tokens
-        </h2>
-        
-        {!isConnected ? (
-          <p className="text-gray-500 dark:text-gray-400 text-center py-8">
-            Connect your wallet to stake tokens
-          </p>
-        ) : (
-          <div className="space-y-4">
+        {/* Stake tab */}
+        {activeTab === 'stake' && (
+          <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="stake-amount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Amount to Stake
               </label>
               <div className="relative">
                 <input
+                  id="stake-amount"
                   type="number"
                   value={stakeAmount}
                   onChange={(e) => setStakeAmount(e.target.value)}
-                  placeholder="Enter amount"
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="0.00"
+                  min="0"
+                  step="0.01"
+                  className="w-full px-4 py-3 pr-20 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  aria-describedby="stake-balance"
                 />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">
-                  DAO
-                </span>
+                <button 
+                  onClick={() => daoBalance && setStakeAmount(daoBalance.toString())}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 text-xs font-medium text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded"
+                >
+                  MAX
+                </button>
+              </div>
+              {isConnected && (
+                <p id="stake-balance" className="text-sm text-gray-500 mt-1">
+                  Available: {daoBalance?.toLocaleString() || '0'} DAO
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Lock Duration
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                {DURATIONS.map(dur => (
+                  <button
+                    key={dur.blocks}
+                    onClick={() => setSelectedDuration(dur)}
+                    className={`py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                      selectedDuration.blocks === dur.blocks 
+                        ? 'bg-primary-600 text-white' 
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200'
+                    }`}
+                  >
+                    {dur.label}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {selectedTier && stakeAmount && (
-              <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500 dark:text-gray-400">Selected Tier</span>
-                  <span className="font-medium text-gray-900 dark:text-white">
-                    {TIER_ICONS[selectedTier - 1]} {STAKING_TIERS[selectedTier - 1].name}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm mt-2">
-                  <span className="text-gray-500 dark:text-gray-400">Lock Period</span>
-                  <span className="font-medium text-gray-900 dark:text-white">
-                    {STAKING_TIERS[selectedTier - 1].lockDays} days
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm mt-2">
-                  <span className="text-gray-500 dark:text-gray-400">Estimated Rewards</span>
-                  <span className="font-medium text-green-600 dark:text-green-400">
-                    +{calculateEstimatedRewards()} DAO
-                  </span>
+            {stakeAmount && parseFloat(stakeAmount) > 0 && (
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg p-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Estimated Rewards</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      +{calculateRewards(parseFloat(stakeAmount), selectedDuration)} DAO
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">APY</p>
+                    <p className="text-xl font-bold text-primary-600">{(selectedDuration.rate / 100).toFixed(0)}%</p>
+                  </div>
                 </div>
               </div>
             )}
 
             <button
               onClick={handleStake}
-              disabled={!stakeAmount || !selectedTier || isStaking}
-              className="w-full px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
+              disabled={!isConnected || !stakeAmount || submitting}
+              className="w-full btn-primary py-3 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {isStaking ? 'Staking...' : 'Stake Tokens'}
+              {submitting ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Processing...
+                </>
+              ) : isConnected ? 'Stake Tokens' : 'Connect Wallet to Stake'}
+            </button>
+          </div>
+        )}
+
+        {/* Unstake tab */}
+        {activeTab === 'unstake' && (
+          <div>
+            {userStakes.length > 0 ? (
+              <div className="space-y-4">
+                {userStakes.map((stake, i) => (
+                  <div key={i} className="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">{stake.amount.toLocaleString()} DAO</p>
+                      <p className="text-sm text-gray-500">Locked until block {stake.lockUntil}</p>
+                    </div>
+                    <button 
+                      onClick={() => handleUnstake(stake.id)}
+                      disabled={submitting}
+                      className="btn-secondary"
+                    >
+                      Unstake
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <svg className="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+                <p className="text-gray-500 dark:text-gray-400">No active stakes</p>
+                <p className="text-sm text-gray-400 mt-1">Stake tokens to see them here</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Rewards tab */}
+        {activeTab === 'rewards' && (
+          <div className="space-y-6">
+            <div className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 rounded-lg p-6 text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Claimable Rewards</p>
+              <p className="text-4xl font-bold text-amber-600">0.00 DAO</p>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg text-center">
+                <p className="text-sm text-gray-500 mb-1">Total Earned</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">0.00 DAO</p>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg text-center">
+                <p className="text-sm text-gray-500 mb-1">Total Claimed</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">0.00 DAO</p>
+              </div>
+            </div>
+
+            <button
+              onClick={handleClaimRewards}
+              disabled={!isConnected || submitting}
+              className="w-full btn-primary py-3 disabled:opacity-50"
+            >
+              Claim Rewards
             </button>
           </div>
         )}
       </div>
 
-      {/* Staking Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Total Value Locked</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">2.5M DAO</p>
-          <p className="text-sm text-green-600">+12.5% this week</p>
-        </div>
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Total Stakers</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">1,247</p>
-          <p className="text-sm text-green-600">+89 this week</p>
-        </div>
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Average APY</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">15.2%</p>
-          <p className="text-sm text-gray-500">Weighted average</p>
+      {/* Info section */}
+      <div className="card bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-800">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">About Staking</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div>
+            <h3 className="font-medium text-gray-900 dark:text-white mb-1">Earn Rewards</h3>
+            <p className="text-gray-600 dark:text-gray-400">Stake your DAO tokens to earn up to 25% APY based on lock duration.</p>
+          </div>
+          <div>
+            <h3 className="font-medium text-gray-900 dark:text-white mb-1">Boost Voting Power</h3>
+            <p className="text-gray-600 dark:text-gray-400">Staked tokens count toward your governance voting power.</p>
+          </div>
+          <div>
+            <h3 className="font-medium text-gray-900 dark:text-white mb-1">Early Unstake</h3>
+            <p className="text-gray-600 dark:text-gray-400">Early unstaking incurs a 20% penalty. Wait for lock period to avoid fees.</p>
+          </div>
         </div>
       </div>
     </div>
