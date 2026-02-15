@@ -38,20 +38,49 @@ export default function Modal({
     return () => window.removeEventListener('keydown', handleEscape)
   }, [isOpen, closeOnEscape, onClose])
 
+  // Focus trap - handle Tab key to keep focus within modal
+  const handleKeyDown = useCallback((e) => {
+    if (e.key !== 'Tab' || !modalRef.current) return
+
+    const focusableElements = modalRef.current?.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    ) || []
+    
+    if (focusableElements.length === 0) return
+
+    const firstElement = focusableElements[0]
+    const lastElement = focusableElements[focusableElements.length - 1]
+
+    if (e.shiftKey) {
+      if (document.activeElement === firstElement) {
+        e.preventDefault()
+        lastElement?.focus()
+      }
+    } else {
+      if (document.activeElement === lastElement) {
+        e.preventDefault()
+        firstElement?.focus()
+      }
+    }
+  }, [])
+
   // Lock body scroll and manage focus
   useEffect(() => {
     if (isOpen) {
       previousActiveElement.current = document.activeElement
       document.body.style.overflow = 'hidden'
       modalRef.current?.focus()
+      window.addEventListener('keydown', handleKeyDown)
     } else {
       document.body.style.overflow = ''
       previousActiveElement.current?.focus()
+      window.removeEventListener('keydown', handleKeyDown)
     }
     return () => {
       document.body.style.overflow = ''
+      window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [isOpen])
+  }, [isOpen, handleKeyDown])
 
   const handleBackdropClick = (e) => {
     if (closeOnBackdrop && e.target === e.currentTarget) {

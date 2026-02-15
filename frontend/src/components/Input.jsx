@@ -17,20 +17,30 @@ const Input = forwardRef(function Input(
     fullWidth = true,
     className = '',
     containerClassName = '',
+    success = false,
     ...props
   },
   ref
 ) {
-  const hasError = !!error
+  const [touched, setTouched] = useState(false)
+  const hasError = touched && !!error
+  const showSuccess = touched && success && !error
   const widthClass = fullWidth ? 'w-full' : ''
   
   const baseClasses = `block rounded-lg border bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 transition-colors ${SIZES[size]}`
   
   const stateClasses = hasError
     ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+    : showSuccess
+    ? 'border-green-500 focus:border-green-500 focus:ring-green-500/20'
     : 'border-gray-300 dark:border-gray-600 focus:border-purple-500 focus:ring-purple-500/20'
   
-  const paddingClasses = `${leftIcon ? 'pl-10' : ''} ${rightIcon ? 'pr-10' : ''}`
+  const paddingClasses = `${leftIcon ? 'pl-10' : ''} ${rightIcon || hasError || showSuccess ? 'pr-10' : ''}`
+
+  const handleBlur = (e) => {
+    setTouched(true)
+    props.onBlur?.(e)
+  }
 
   return (
     <div className={`${fullWidth ? 'w-full' : ''} ${containerClassName}`}>
@@ -52,9 +62,25 @@ const Input = forwardRef(function Input(
           ref={ref}
           className={`${baseClasses} ${stateClasses} ${paddingClasses} ${widthClass} ${className}`}
           aria-invalid={hasError}
-          aria-describedby={error ? `${props.id || props.name}-error` : undefined}
+          aria-describedby={hasError ? `${props.id || props.name}-error` : hint ? `${props.id || props.name}-hint` : undefined}
+          onBlur={handleBlur}
           {...props}
         />
+        
+        {!rightIcon && (hasError || showSuccess) && (
+          <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+            {hasError && (
+              <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18.101 12.93a1 1 0 00-1.414-1.414L10 15.586l-6.687-6.687a1 1 0 00-1.414 1.414l8.101 8.101a1 1 0 001.414 0l10.101-10.101z" clipRule="evenodd" />
+              </svg>
+            )}
+            {showSuccess && (
+              <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+            )}
+          </div>
+        )}
         
         {rightIcon && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400">
@@ -63,14 +89,20 @@ const Input = forwardRef(function Input(
         )}
       </div>
       
-      {error && (
-        <p id={`${props.id || props.name}-error`} className="mt-1.5 text-sm text-red-600 dark:text-red-400">
-          {error}
+      {hasError && (
+        <p id={`${props.id || props.name}-error`} className="mt-1.5 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+          <span>✕</span> {error}
         </p>
       )}
       
-      {hint && !error && (
-        <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">{hint}</p>
+      {showSuccess && (
+        <p className="mt-1.5 text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
+          <span>✓</span> Looks good!
+        </p>
+      )}
+      
+      {hint && !hasError && !showSuccess && (
+        <p id={`${props.id || props.name}-hint`} className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">{hint}</p>
       )}
     </div>
   )
