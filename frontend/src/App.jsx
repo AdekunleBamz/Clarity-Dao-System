@@ -5,7 +5,7 @@ import Dashboard from './components/Dashboard'
 import Governance from './components/Governance'
 import Treasury from './components/Treasury'
 import Tokens from './components/Tokens'
-import NotFound from './components/NotFound'
+import Bounty from './components/Bounty'
 
 function App() {
   return (
@@ -17,7 +17,7 @@ function App() {
           <Route path="/governance" element={<Governance />} />
           <Route path="/treasury" element={<Treasury />} />
           <Route path="/tokens" element={<Tokens />} />
-          <Route path="*" element={<NotFound />} />
+          <Route path="/bounties" element={<Bounty />} />
         </Routes>
       </main>
     </div>
