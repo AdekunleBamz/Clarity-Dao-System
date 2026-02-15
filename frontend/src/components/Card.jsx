@@ -1,42 +1,47 @@
 /**
- * Card Component Library
- * Flexible card components for DAO dashboard
+ * Card component library for consistent container styling
  */
 
+/**
+ * Base Card component
+ */
 export default function Card({
   children,
   variant = 'default',
   padding = 'md',
   hover = false,
-  className = '',
+  clickable = false,
   onClick,
+  className = '',
+  ...props
 }) {
   const variants = {
     default: 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700',
     elevated: 'bg-white dark:bg-gray-800 shadow-lg',
-    outlined: 'bg-transparent border-2 border-gray-300 dark:border-gray-600',
+    outlined: 'border-2 border-gray-300 dark:border-gray-600 bg-transparent',
     filled: 'bg-gray-100 dark:bg-gray-900',
-    gradient: 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white',
+    gradient: 'bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-200 dark:border-purple-800',
   }
 
   const paddings = {
-    none: 'p-0',
+    none: '',
     sm: 'p-3',
     md: 'p-4',
     lg: 'p-6',
     xl: 'p-8',
   }
 
-  const hoverClass = hover
-    ? 'transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer'
-    : ''
+  const hoverEffect = hover ? 'transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5' : ''
+  const clickableEffect = clickable ? 'cursor-pointer active:scale-[0.98]' : ''
 
   return (
     <div
-      className={`rounded-xl ${variants[variant]} ${paddings[padding]} ${hoverClass} ${className}`}
-      onClick={onClick}
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
+      className={`rounded-xl ${variants[variant]} ${paddings[padding]} ${hoverEffect} ${clickableEffect} ${className}`}
+      onClick={clickable ? onClick : undefined}
+      role={clickable ? 'button' : undefined}
+      tabIndex={clickable ? 0 : undefined}
+      onKeyDown={clickable ? (e) => e.key === 'Enter' && onClick?.() : undefined}
+      {...props}
     >
       {children}
     </div>
@@ -44,48 +49,44 @@ export default function Card({
 }
 
 /**
- * Card Header
+ * Card Header section
  */
 export function CardHeader({
+  children,
   title,
   subtitle,
   action,
-  icon,
   className = '',
 }) {
   return (
-    <div className={`flex items-start justify-between ${className}`}>
-      <div className="flex items-start gap-3">
-        {icon && (
-          <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
-            {icon}
-          </div>
-        )}
-        <div>
-          <h3 className="font-semibold text-gray-900 dark:text-white">
+    <div className={`flex items-start justify-between mb-4 ${className}`}>
+      <div>
+        {title && (
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
             {title}
           </h3>
-          {subtitle && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-              {subtitle}
-            </p>
-          )}
-        </div>
+        )}
+        {subtitle && (
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            {subtitle}
+          </p>
+        )}
+        {children}
       </div>
-      {action && <div>{action}</div>}
+      {action && <div className="ml-4 flex-shrink-0">{action}</div>}
     </div>
   )
 }
 
 /**
- * Card Body
+ * Card Body section
  */
 export function CardBody({ children, className = '' }) {
-  return <div className={`mt-4 ${className}`}>{children}</div>
+  return <div className={className}>{children}</div>
 }
 
 /**
- * Card Footer
+ * Card Footer section
  */
 export function CardFooter({
   children,
@@ -105,17 +106,18 @@ export function CardFooter({
  * Stat Card for displaying metrics
  */
 export function StatCard({
-  label,
+  title,
   value,
   change,
   changeType = 'neutral',
   icon,
+  loading = false,
   className = '',
 }) {
   const changeColors = {
     positive: 'text-green-600 dark:text-green-400',
     negative: 'text-red-600 dark:text-red-400',
-    neutral: 'text-gray-500 dark:text-gray-400',
+    neutral: 'text-gray-600 dark:text-gray-400',
   }
 
   const changeIcons = {
@@ -127,19 +129,25 @@ export function StatCard({
   return (
     <Card className={className}>
       <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-            {value}
+        <div className="flex-1">
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            {title}
           </p>
-          {change && (
-            <p className={`text-sm mt-1 ${changeColors[changeType]}`}>
-              {changeIcons[changeType]} {change}
+          {loading ? (
+            <div className="mt-2 h-8 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          ) : (
+            <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
+              {value}
+            </p>
+          )}
+          {change !== undefined && !loading && (
+            <p className={`mt-1 text-sm ${changeColors[changeType]}`}>
+              <span>{changeIcons[changeType]}</span> {change}
             </p>
           )}
         </div>
         {icon && (
-          <div className="p-3 rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
+          <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-purple-600 dark:text-purple-400">
             {icon}
           </div>
         )}
@@ -149,172 +157,190 @@ export function StatCard({
 }
 
 /**
- * Feature Card with icon
+ * Feature Card for showcasing features
  */
 export function FeatureCard({
   icon,
   title,
   description,
-  action,
+  link,
   className = '',
 }) {
-  return (
-    <Card hover className={className}>
-      <div className="text-center">
-        <div className="inline-flex p-4 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white mb-4">
+  const content = (
+    <Card hover={!!link} clickable={!!link} className={className}>
+      {icon && (
+        <div className="w-12 h-12 flex items-center justify-center bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg text-white text-xl mb-4">
           {icon}
         </div>
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-          {title}
-        </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-          {description}
+      )}
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+        {title}
+      </h3>
+      <p className="text-gray-600 dark:text-gray-400 text-sm">
+        {description}
+      </p>
+      {link && (
+        <p className="mt-4 text-purple-600 dark:text-purple-400 text-sm font-medium">
+          Learn more →
         </p>
-        {action}
-      </div>
+      )}
     </Card>
   )
-}
 
-/**
- * Proposal Card for governance
- */
-export function ProposalCard({
-  id,
-  title,
-  description,
-  status,
-  votes,
-  deadline,
-  onClick,
-  className = '',
-}) {
-  const statusStyles = {
-    active: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-    passed: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-    failed: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-    pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+  if (link) {
+    return (
+      <a href={link} className="block">
+        {content}
+      </a>
+    )
   }
 
-  const totalVotes = (votes?.for || 0) + (votes?.against || 0)
-  const forPercent = totalVotes > 0 ? ((votes?.for || 0) / totalVotes) * 100 : 0
-
-  return (
-    <Card hover onClick={onClick} className={className}>
-      <div className="flex items-start justify-between mb-3">
-        <span className="text-sm text-gray-500 dark:text-gray-400">
-          Proposal #{id}
-        </span>
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusStyles[status]}`}>
-          {status.charAt(0).toUpperCase() + status.slice(1)}
-        </span>
-      </div>
-      
-      <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-        {title}
-      </h3>
-      <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4">
-        {description}
-      </p>
-      
-      {votes && (
-        <div className="mb-3">
-          <div className="flex justify-between text-sm mb-1">
-            <span className="text-green-600 dark:text-green-400">
-              For: {votes.for?.toLocaleString()}
-            </span>
-            <span className="text-red-600 dark:text-red-400">
-              Against: {votes.against?.toLocaleString()}
-            </span>
-          </div>
-          <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-green-500"
-              style={{ width: `${forPercent}%` }}
-            />
-          </div>
-        </div>
-      )}
-      
-      {deadline && (
-        <p className="text-xs text-gray-400 dark:text-gray-500">
-          Ends: {deadline}
-        </p>
-      )}
-    </Card>
-  )
+  return content
 }
 
 /**
- * Token Card for displaying token info
+ * Profile Card for user/member display
  */
-export function TokenCard({
+export function ProfileCard({
+  avatar,
   name,
-  symbol,
-  balance,
-  value,
-  icon,
-  change,
-  onClick,
+  role,
+  stats,
+  actions,
   className = '',
 }) {
-  const isPositive = change > 0
-  const isNegative = change < 0
+  return (
+    <Card className={`text-center ${className}`}>
+      <div className="flex flex-col items-center">
+        {avatar ? (
+          <img
+            src={avatar}
+            alt={name}
+            className="w-20 h-20 rounded-full object-cover mb-4"
+          />
+        ) : (
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-2xl font-bold mb-4">
+            {name?.charAt(0)?.toUpperCase() || '?'}
+          </div>
+        )}
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          {name}
+        </h3>
+        {role && (
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{role}</p>
+        )}
+      </div>
+
+      {stats && stats.length > 0 && (
+        <div className="flex justify-center gap-6 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          {stats.map((stat, index) => (
+            <div key={index} className="text-center">
+              <p className="text-lg font-bold text-gray-900 dark:text-white">
+                {stat.value}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {stat.label}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {actions && (
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          {actions}
+        </div>
+      )}
+    </Card>
+  )
+}
+
+/**
+ * Card Grid container
+ */
+export function CardGrid({
+  children,
+  columns = 3,
+  gap = 'md',
+  className = '',
+}) {
+  const colClasses = {
+    1: 'grid-cols-1',
+    2: 'grid-cols-1 sm:grid-cols-2',
+    3: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+    4: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4',
+  }
+
+  const gapClasses = {
+    sm: 'gap-3',
+    md: 'gap-4',
+    lg: 'gap-6',
+    xl: 'gap-8',
+  }
 
   return (
-    <Card hover onClick={onClick} className={className}>
-      <div className="flex items-center gap-4">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold">
-          {icon || symbol?.charAt(0)}
-        </div>
-        <div className="flex-1">
-          <h3 className="font-semibold text-gray-900 dark:text-white">
-            {name}
-          </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            {balance} {symbol}
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="font-semibold text-gray-900 dark:text-white">
-            {value}
-          </p>
-          {change !== undefined && (
-            <p className={`text-sm ${isPositive ? 'text-green-500' : isNegative ? 'text-red-500' : 'text-gray-500'}`}>
-              {isPositive ? '+' : ''}{change}%
-            </p>
-          )}
-        </div>
+    <div className={`grid ${colClasses[columns]} ${gapClasses[gap]} ${className}`}>
+      {children}
+    </div>
+  )
+}
+
+/**
+ * Skeleton Card for loading states
+ */
+export function SkeletonCard({ lines = 3, className = '' }) {
+  return (
+    <Card className={className}>
+      <div className="animate-pulse">
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4" />
+        {Array.from({ length: lines }).map((_, i) => (
+          <div
+            key={i}
+            className={`h-3 bg-gray-200 dark:bg-gray-700 rounded mb-2 ${
+              i === lines - 1 ? 'w-2/3' : 'w-full'
+            }`}
+          />
+        ))}
       </div>
     </Card>
   )
 }
 
 /**
- * Empty State Card
+ * Collapsible Card
  */
-export function EmptyStateCard({
-  icon,
+export function CollapsibleCard({
   title,
-  description,
-  action,
+  children,
+  defaultOpen = false,
   className = '',
 }) {
+  const [isOpen, setIsOpen] = useState(defaultOpen)
+
   return (
-    <Card className={`text-center py-12 ${className}`}>
-      {icon && (
-        <div className="text-gray-400 dark:text-gray-500 mb-4 flex justify-center">
-          {icon}
+    <Card padding="none" className={className}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
+      >
+        <span className="font-medium text-gray-900 dark:text-white">{title}</span>
+        <svg
+          className={`w-5 h-5 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {isOpen && (
+        <div className="px-4 pb-4 pt-2 border-t border-gray-200 dark:border-gray-700">
+          {children}
         </div>
       )}
-      <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-        {title}
-      </h3>
-      <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-sm mx-auto">
-        {description}
-      </p>
-      {action}
     </Card>
   )
 }
-improved card spacing
+
+// Import useState for CollapsibleCard
+import { useState } from 'react'
