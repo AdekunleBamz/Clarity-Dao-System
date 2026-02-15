@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useWallet } from '../context/WalletContext'
+import { ThemeToggle } from '../context/ThemeContext'
 import WalletConnectButton from './WalletConnectButton'
 
 export default function Header() {
@@ -47,7 +48,10 @@ export default function Header() {
             </nav>
           </div>
 
-          <WalletConnectButton />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <WalletConnectButton />
+          </div>
         </div>
       </div>
     </header>
