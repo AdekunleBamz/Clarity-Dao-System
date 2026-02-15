@@ -1,157 +1,249 @@
 /**
  * Application-wide constants and configuration
+ * Centralized configuration for the Clarity DAO frontend
  */
 
-// Network configuration
-export const NETWORK = {
-  MAINNET: {
-    name: 'mainnet',
-    apiUrl: 'https://api.hiro.so',
-    explorerUrl: 'https://explorer.stacks.co',
+// ============ Network Configuration ============
+
+export const NETWORKS = {
+  mainnet: {
+    name: 'Stacks Mainnet',
     chainId: 1,
+    url: 'https://api.hiro.so',
+    explorerUrl: 'https://explorer.stacks.co',
+    coreApiUrl: 'https://stacks-node-api.mainnet.stacks.co',
   },
-  TESTNET: {
-    name: 'testnet',
-    apiUrl: 'https://api.testnet.hiro.so',
-    explorerUrl: 'https://explorer.stacks.co/?chain=testnet',
+  testnet: {
+    name: 'Stacks Testnet',
     chainId: 2147483648,
+    url: 'https://api.testnet.hiro.so',
+    explorerUrl: 'https://explorer.stacks.co/?chain=testnet',
+    coreApiUrl: 'https://stacks-node-api.testnet.stacks.co',
   },
 }
 
-export const CURRENT_NETWORK = NETWORK.MAINNET
+export const DEFAULT_NETWORK = 'mainnet'
+export const CURRENT_NETWORK = NETWORKS[DEFAULT_NETWORK]
 
-// Deployed contract addresses (mainnet)
+// ============ Contract Addresses ============
+
 export const CONTRACTS = {
-  DAO_TOKEN: 'SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N.dao-token-v5-1',
-  GOVERNANCE: 'SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N.governance-v5-1',
-  TREASURY: 'SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N.treasury-v5-1',
-  STAKING: 'SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N.staking-v5-1',
-  BOUNTY: 'SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N.bounty-v5-1',
-  MEMBERSHIP_NFT: 'SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N.membership-nft-v5-1',
+  mainnet: {
+    deployer: 'SP3FKNEZ86RG5RT7SZ5FBRGH85FZNG94ZH1MCGG6N',
+    daoToken: 'dao-token-v5-1',
+    governance: 'governance-v5-1',
+    treasury: 'treasury-v5-1',
+    staking: 'staking-v5-1',
+    bounty: 'bounty-v5-1',
+    membershipNft: 'membership-nft-v5-1',
+  },
+  testnet: {
+    deployer: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM',
+    daoToken: 'dao-token-v5-1',
+    governance: 'governance-v5-1',
+    treasury: 'treasury-v5-1',
+    staking: 'staking-v5-1',
+    bounty: 'bounty-v5-1',
+    membershipNft: 'membership-nft-v5-1',
+  },
 }
 
-// Staking tiers configuration
-export const STAKING_TIERS = [
-  { tier: 1, name: 'Bronze', minStake: 100, apy: 5, lockDays: 7, icon: '🥉' },
-  { tier: 2, name: 'Silver', minStake: 1000, apy: 10, lockDays: 30, icon: '🥈' },
-  { tier: 3, name: 'Gold', minStake: 5000, apy: 15, lockDays: 90, icon: '🥇' },
-  { tier: 4, name: 'Platinum', minStake: 10000, apy: 20, lockDays: 180, icon: '💎' },
-  { tier: 5, name: 'Diamond', minStake: 50000, apy: 25, lockDays: 365, icon: '👑' },
-]
-
-// Membership NFT tiers
-export const MEMBERSHIP_TIERS = [
-  { tier: 1, name: 'Bronze', price: 100, maxSupply: 1000 },
-  { tier: 2, name: 'Silver', price: 500, maxSupply: 500 },
-  { tier: 3, name: 'Gold', price: 1500, maxSupply: 200 },
-  { tier: 4, name: 'Platinum', price: 5000, maxSupply: 50 },
-  { tier: 5, name: 'Diamond', price: 15000, maxSupply: 10 },
-]
-
-// Proposal status mapping
-export const PROPOSAL_STATUS = {
-  DRAFT: 0,
-  ACTIVE: 1,
-  PASSED: 2,
-  REJECTED: 3,
-  EXECUTED: 4,
-  CANCELLED: 5,
-  EXPIRED: 6,
+/**
+ * Get full contract identifier
+ */
+export function getContractId(contractName, network = DEFAULT_NETWORK) {
+  const config = CONTRACTS[network]
+  return `${config.deployer}.${config[contractName]}`
 }
 
-export const PROPOSAL_STATUS_LABELS = {
-  [PROPOSAL_STATUS.DRAFT]: 'Draft',
-  [PROPOSAL_STATUS.ACTIVE]: 'Active',
-  [PROPOSAL_STATUS.PASSED]: 'Passed',
-  [PROPOSAL_STATUS.REJECTED]: 'Rejected',
-  [PROPOSAL_STATUS.EXECUTED]: 'Executed',
-  [PROPOSAL_STATUS.CANCELLED]: 'Cancelled',
-  [PROPOSAL_STATUS.EXPIRED]: 'Expired',
-}
+// ============ Token Configuration ============
 
-// Bounty status
-export const BOUNTY_STATUS = {
-  OPEN: 'open',
-  IN_PROGRESS: 'inProgress',
-  REVIEW: 'review',
-  COMPLETED: 'completed',
-  DISPUTED: 'disputed',
-  CANCELLED: 'cancelled',
-}
-
-// Governance configuration
-export const GOVERNANCE = {
-  MIN_PROPOSAL_THRESHOLD: 1000, // Minimum tokens to create proposal
-  VOTING_PERIOD_BLOCKS: 4320, // ~3 days at 10 min/block
-  EXECUTION_DELAY_BLOCKS: 1440, // ~1 day grace period
-  QUORUM_PERCENTAGE: 10, // 10% of total supply
-}
-
-// Token configuration
 export const TOKEN = {
-  NAME: 'Clarity DAO Token',
-  SYMBOL: 'DAO',
-  DECIMALS: 6,
-  TOTAL_SUPPLY: 100_000_000,
+  name: 'Clarity DAO Token',
+  symbol: 'CDAO',
+  decimals: 6,
+  totalSupply: 1000000000, // 1 billion tokens
 }
 
-// API endpoints
+export const STX = {
+  decimals: 6,
+  symbol: 'STX',
+}
+
+/**
+ * Convert micro units to display units
+ */
+export function fromMicro(amount, decimals = 6) {
+  return Number(amount) / Math.pow(10, decimals)
+}
+
+/**
+ * Convert display units to micro units
+ */
+export function toMicro(amount, decimals = 6) {
+  return Math.floor(Number(amount) * Math.pow(10, decimals))
+}
+
+// ============ Staking Configuration ============
+
+export const STAKING_TIERS = [
+  { tier: 1, name: 'Bronze', minDays: 7, apy: 5, minStake: 10 },
+  { tier: 2, name: 'Silver', minDays: 30, apy: 10, minStake: 100 },
+  { tier: 3, name: 'Gold', minDays: 90, apy: 15, minStake: 500 },
+  { tier: 4, name: 'Platinum', minDays: 180, apy: 20, minStake: 1000 },
+  { tier: 5, name: 'Diamond', minDays: 365, apy: 25, minStake: 5000 },
+]
+
+export const STAKING_POOLS = [
+  { id: 'governance', name: 'Governance Pool', description: 'Earn rewards for participating in governance', multiplier: 1 },
+  { id: 'development', name: 'Development Pool', description: 'Support protocol development', multiplier: 1.2 },
+  { id: 'community', name: 'Community Pool', description: 'Fund community initiatives', multiplier: 1.1 },
+]
+
+// ============ Governance Configuration ============
+
+export const GOVERNANCE = {
+  proposalMinimumTokens: 1000, // Minimum tokens to create proposal
+  votingPeriodBlocks: 1440, // ~10 days at 10 min/block
+  quorumPercentage: 10, // 10% of total supply must vote
+  passingThreshold: 51, // 51% yes votes to pass
+  executionDelay: 144, // ~1 day delay before execution
+  maxActiveProposals: 10, // Maximum concurrent active proposals
+}
+
+export const PROPOSAL_TYPES = [
+  { id: 'treasury', label: 'Treasury', description: 'Allocate funds from treasury' },
+  { id: 'parameter', label: 'Parameter Change', description: 'Modify protocol parameters' },
+  { id: 'upgrade', label: 'Contract Upgrade', description: 'Upgrade smart contracts' },
+  { id: 'membership', label: 'Membership', description: 'Membership-related decisions' },
+  { id: 'general', label: 'General', description: 'General governance proposals' },
+]
+
+export const PROPOSAL_STATUS = {
+  draft: { label: 'Draft', color: 'gray' },
+  active: { label: 'Active', color: 'blue' },
+  passed: { label: 'Passed', color: 'green' },
+  rejected: { label: 'Rejected', color: 'red' },
+  executed: { label: 'Executed', color: 'purple' },
+  expired: { label: 'Expired', color: 'yellow' },
+}
+
+// ============ Bounty Configuration ============
+
+export const BOUNTY_STATUS = {
+  open: { label: 'Open', color: 'green' },
+  inProgress: { label: 'In Progress', color: 'blue' },
+  review: { label: 'In Review', color: 'yellow' },
+  completed: { label: 'Completed', color: 'purple' },
+  cancelled: { label: 'Cancelled', color: 'gray' },
+  disputed: { label: 'Disputed', color: 'red' },
+}
+
+export const BOUNTY_CATEGORIES = [
+  { id: 'development', label: 'Development', icon: '💻' },
+  { id: 'design', label: 'Design', icon: '🎨' },
+  { id: 'documentation', label: 'Documentation', icon: '📝' },
+  { id: 'marketing', label: 'Marketing', icon: '📢' },
+  { id: 'community', label: 'Community', icon: '👥' },
+  { id: 'security', label: 'Security', icon: '🔒' },
+]
+
+// ============ NFT Membership Tiers ============
+
+export const MEMBERSHIP_TIERS = [
+  { tier: 1, name: 'Member', color: '#6B7280', benefits: ['Basic voting rights'] },
+  { tier: 2, name: 'Contributor', color: '#3B82F6', benefits: ['Proposal creation', 'Priority support'] },
+  { tier: 3, name: 'Advocate', color: '#8B5CF6', benefits: ['Bounty review', 'Delegation rights'] },
+  { tier: 4, name: 'Guardian', color: '#F59E0B', benefits: ['Treasury oversight', 'Emergency powers'] },
+  { tier: 5, name: 'Legend', color: '#EF4444', benefits: ['All benefits', 'Lifetime membership'] },
+]
+
+// ============ UI Configuration ============
+
+export const PAGINATION = {
+  defaultPageSize: 20,
+  pageSizeOptions: [10, 20, 50, 100],
+}
+
+export const TOAST = {
+  defaultDuration: 5000,
+  maxToasts: 5,
+}
+
+export const REFRESH_INTERVALS = {
+  balance: 30000, // 30 seconds
+  transactions: 60000, // 1 minute
+  proposals: 120000, // 2 minutes
+  blockHeight: 10000, // 10 seconds
+}
+
+// ============ API Configuration ============
+
 export const API = {
-  HIRO_API: 'https://api.hiro.so',
-  PRICE_API: 'https://api.coingecko.com/api/v3',
+  baseUrl: CURRENT_NETWORK.url,
+  timeout: 30000,
+  retryAttempts: 3,
+  retryDelay: 1000,
+  rateLimit: {
+    maxRequests: 30,
+    windowMs: 60000,
+  },
 }
 
-// Local storage keys
-export const STORAGE_KEYS = {
-  THEME: 'clarity-dao-theme',
-  WALLET_SESSION: 'clarity-dao-wallet-session',
-  SETTINGS: 'clarity-dao-settings',
-  RECENT_TRANSACTIONS: 'clarity-dao-recent-txs',
-}
+// ============ Wallet Configuration ============
 
-// UI configuration
-export const UI = {
-  TOAST_DURATION: 5000,
-  DEBOUNCE_DELAY: 300,
-  PAGINATION_SIZE: 10,
-  MAX_RECENT_TRANSACTIONS: 20,
-}
+export const SUPPORTED_WALLETS = [
+  { id: 'leather', name: 'Leather', icon: '🧥', downloadUrl: 'https://leather.io' },
+  { id: 'xverse', name: 'Xverse', icon: '✖️', downloadUrl: 'https://xverse.app' },
+  { id: 'hiro', name: 'Hiro Wallet', icon: '🔷', downloadUrl: 'https://hiro.so/wallet' },
+]
 
-// Social links
+// ============ Social Links ============
+
 export const SOCIAL_LINKS = {
-  TWITTER: 'https://twitter.com/ClarityDAO',
-  DISCORD: 'https://discord.gg/clarityDAO',
-  GITHUB: 'https://github.com/AdekunleBamz/Clarity-Dao-System',
-  DOCS: 'https://docs.claritydao.xyz',
+  twitter: 'https://twitter.com/claritydao',
+  discord: 'https://discord.gg/claritydao',
+  github: 'https://github.com/AdekunleBamz/Clarity-Dao-System',
+  docs: 'https://docs.claritydao.io',
 }
 
-// Helper to get explorer URL for transaction
-export function getExplorerTxUrl(txId) {
-  return `${CURRENT_NETWORK.explorerUrl}/txid/${txId}?chain=${CURRENT_NETWORK.name}`
-}
+// ============ Feature Flags ============
 
-// Helper to get explorer URL for address
-export function getExplorerAddressUrl(address) {
-  return `${CURRENT_NETWORK.explorerUrl}/address/${address}?chain=${CURRENT_NETWORK.name}`
-}
-
-// Helper to get explorer URL for contract
-export function getExplorerContractUrl(contractId) {
-  return `${CURRENT_NETWORK.explorerUrl}/txid/${contractId}?chain=${CURRENT_NETWORK.name}`
+export const FEATURES = {
+  enableStaking: true,
+  enableBounties: true,
+  enableDelegation: true,
+  enableQuadraticVoting: true,
+  enableConvictionVoting: true,
+  enableNftMembership: true,
+  enableStreamingPayments: true,
+  enableRecurringPayments: true,
+  enableAutoCompound: true,
 }
 
 export default {
-  NETWORK,
+  NETWORKS,
+  DEFAULT_NETWORK,
   CURRENT_NETWORK,
   CONTRACTS,
+  getContractId,
+  TOKEN,
+  STX,
+  fromMicro,
+  toMicro,
   STAKING_TIERS,
-  MEMBERSHIP_TIERS,
+  STAKING_POOLS,
+  GOVERNANCE,
+  PROPOSAL_TYPES,
   PROPOSAL_STATUS,
   BOUNTY_STATUS,
-  GOVERNANCE,
-  TOKEN,
+  BOUNTY_CATEGORIES,
+  MEMBERSHIP_TIERS,
+  PAGINATION,
+  TOAST,
+  REFRESH_INTERVALS,
   API,
-  STORAGE_KEYS,
-  UI,
+  SUPPORTED_WALLETS,
   SOCIAL_LINKS,
+  FEATURES,
 }
