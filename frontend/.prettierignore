@@ -1,0 +1,18 @@
+# Ignore build outputs
+dist
+build
+node_modules
+
+# Ignore generated files
+*.min.js
+*.min.css
+
+# Ignore lock files
+package-lock.json
+
+# Ignore coverage reports
+coverage
+
+# Ignore environment files
+.env*
+!.env.example
