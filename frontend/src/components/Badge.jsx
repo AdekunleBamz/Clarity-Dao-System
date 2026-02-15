@@ -1,5 +1,9 @@
+/**
+ * Badge component system for status indicators and labels
+ */
+
 const VARIANTS = {
-  default: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+  default: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
   primary: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
   success: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
   warning: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
@@ -13,6 +17,9 @@ const SIZES = {
   lg: 'px-3 py-1.5 text-base',
 }
 
+/**
+ * Base Badge component
+ */
 export default function Badge({
   children,
   variant = 'default',
@@ -22,29 +29,30 @@ export default function Badge({
   removable = false,
   onRemove,
   className = '',
+  ...props
 }) {
   const roundedClasses = {
     full: 'rounded-full',
     lg: 'rounded-lg',
     md: 'rounded-md',
+    sm: 'rounded-sm',
     none: 'rounded-none',
-  }
-
-  const dotColors = {
-    default: 'bg-gray-500',
-    primary: 'bg-purple-500',
-    success: 'bg-green-500',
-    warning: 'bg-yellow-500',
-    danger: 'bg-red-500',
-    info: 'bg-blue-500',
   }
 
   return (
     <span
       className={`inline-flex items-center font-medium ${VARIANTS[variant]} ${SIZES[size]} ${roundedClasses[rounded]} ${className}`}
+      {...props}
     >
       {dot && (
-        <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${dotColors[variant]}`} />
+        <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+          variant === 'success' ? 'bg-green-500' :
+          variant === 'warning' ? 'bg-yellow-500' :
+          variant === 'danger' ? 'bg-red-500' :
+          variant === 'info' ? 'bg-blue-500' :
+          variant === 'primary' ? 'bg-purple-500' :
+          'bg-gray-500'
+        }`} />
       )}
       {children}
       {removable && (
@@ -68,7 +76,7 @@ export default function Badge({
 }
 
 /**
- * Status Badge with predefined statuses
+ * Status badge with predefined statuses
  */
 export function StatusBadge({ status, size = 'md' }) {
   const statusConfig = {
@@ -78,8 +86,11 @@ export function StatusBadge({ status, size = 'md' }) {
     completed: { variant: 'success', label: 'Completed' },
     failed: { variant: 'danger', label: 'Failed' },
     cancelled: { variant: 'default', label: 'Cancelled' },
+    draft: { variant: 'default', label: 'Draft' },
     open: { variant: 'success', label: 'Open', dot: true },
     closed: { variant: 'danger', label: 'Closed' },
+    inProgress: { variant: 'info', label: 'In Progress', dot: true },
+    review: { variant: 'warning', label: 'In Review' },
     passed: { variant: 'success', label: 'Passed' },
     rejected: { variant: 'danger', label: 'Rejected' },
     executed: { variant: 'primary', label: 'Executed' },
@@ -96,12 +107,12 @@ export function StatusBadge({ status, size = 'md' }) {
 }
 
 /**
- * Tier Badge for membership/staking levels
+ * Tier badge for membership/staking levels
  */
 export function TierBadge({ tier, showLabel = true }) {
   const tiers = {
     1: { label: 'Bronze', color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300', icon: '🥉' },
-    2: { label: 'Silver', color: 'bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200', icon: '🥈' },
+    2: { label: 'Silver', color: 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300', icon: '🥈' },
     3: { label: 'Gold', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300', icon: '🥇' },
     4: { label: 'Platinum', color: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300', icon: '💎' },
     5: { label: 'Diamond', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300', icon: '👑' },
@@ -118,7 +129,7 @@ export function TierBadge({ tier, showLabel = true }) {
 }
 
 /**
- * Count Badge (notification style)
+ * Count badge (notification style)
  */
 export function CountBadge({ count, max = 99, variant = 'danger', className = '' }) {
   if (!count || count <= 0) return null
@@ -135,7 +146,36 @@ export function CountBadge({ count, max = 99, variant = 'danger', className = ''
 }
 
 /**
- * Outline Badge variant
+ * Badge with icon
+ */
+export function IconBadge({ icon, children, variant = 'default', size = 'md', className = '' }) {
+  return (
+    <Badge variant={variant} size={size} className={className}>
+      <span className="mr-1">{icon}</span>
+      {children}
+    </Badge>
+  )
+}
+
+/**
+ * Badge group for displaying multiple badges
+ */
+export function BadgeGroup({ children, spacing = 'sm', className = '' }) {
+  const spacingClasses = {
+    sm: 'gap-1',
+    md: 'gap-2',
+    lg: 'gap-3',
+  }
+
+  return (
+    <div className={`flex flex-wrap items-center ${spacingClasses[spacing]} ${className}`}>
+      {children}
+    </div>
+  )
+}
+
+/**
+ * Outline badge variant
  */
 export function OutlineBadge({ children, variant = 'default', size = 'md', className = '' }) {
   const outlineVariants = {
@@ -157,18 +197,20 @@ export function OutlineBadge({ children, variant = 'default', size = 'md', class
 }
 
 /**
- * Badge Group
+ * Animated pulse badge
  */
-export function BadgeGroup({ children, spacing = 'sm', className = '' }) {
-  const spacingClasses = {
-    sm: 'gap-1',
-    md: 'gap-2',
-    lg: 'gap-3',
-  }
-
+export function PulseBadge({ children, variant = 'success', size = 'md' }) {
   return (
-    <div className={`flex flex-wrap items-center ${spacingClasses[spacing]} ${className}`}>
-      {children}
-    </div>
+    <Badge variant={variant} size={size} className="relative">
+      <span className="absolute inset-0 rounded-full animate-ping opacity-75" 
+        style={{
+          backgroundColor: variant === 'success' ? '#22c55e' : 
+                          variant === 'danger' ? '#ef4444' :
+                          variant === 'warning' ? '#f59e0b' : '#a855f7',
+          opacity: 0.3,
+        }} 
+      />
+      <span className="relative">{children}</span>
+    </Badge>
   )
 }
