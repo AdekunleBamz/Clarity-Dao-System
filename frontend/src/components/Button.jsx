@@ -148,3 +148,4 @@ export function LinkButton({
     </a>
   )
 }
+improved button variants
